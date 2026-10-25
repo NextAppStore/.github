@@ -18,4 +18,4 @@ Der AppStore stellt **vorkonfigurierte “Apps”/"Templates"** bereit, die sich
 **Dozierende:** einfache Bereitstellung und Verwaltung von Kursumgebungen  
 
 ## Lokales Setup
-Eine Schritt-für-Schritt-Anleitung zum lokalen Aufsetzen der Entwicklungsumgebung findet sich in der [Setup-Dokumentation](https://github.com/six7-click-n-deploy/deployment#lokales-setup).
+Eine Schritt-für-Schritt-Anleitung zum lokalen Aufsetzen der Entwicklungsumgebung findet sich in der [Setup-Dokumentation](https://github.com/NextAppStore/deployment/blob/main/docs/dev-setup.md).
