@@ -37,6 +37,7 @@
 
 ## IT Dozent
 
+
 <a id="it-1"></a>
 
 ### IT-1 · VM schnell bereitstellen
@@ -51,9 +52,19 @@
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Der Dozent kann eine App aus dem Katalog auswählen und für die Studierenden eines Kurses deployen. |
+| 2 | Alle Studierenden erhalten dieselbe App-Version. |
+| 3 | Benötigt die App keine Pflichtangaben, lässt sich das Deployment per Schnell-Deploy direkt von der App-Kachel starten, ohne den Wizard durchlaufen zu müssen. |
+| 4 | Der Fortschritt des Deployments ist live sichtbar. Erfolg oder Fehler wird angezeigt. |
+| 5 | Nach erfolgreichem Deployment sehen die Studierenden ihre Zugangsdaten in der Oberfläche und erhalten sie per E-Mail. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
+
+Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-Deploy) macht es prüfbar.
 
 <a id="it-2"></a>
 
@@ -64,13 +75,53 @@
 | **Als** | IT Dozent |
 | **möchte ich** | die Möglichkeit haben, eine VM mit funktionierenden Standardeinstellungen auszuwählen, aber auch wenn nötig, bestimmte Betriebssystem-/Software-Konfiguration bereitzustellen. |
 
+<a id="it-2a"></a>
+
+#### IT-2a · Funktionierende Standardeinstellungen
+
+| | |
+|---|---|
+| **Als** | IT Dozent |
+| **möchte ich** | eine VM mit funktionierenden Standardeinstellungen auswählen, |
+| **damit** | ich ohne Anpassungen eine lauffähige Umgebung bekomme. |
+
 **Akzeptanzkriterien**
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Die Einstellungen einer App sind mit Standardwerten vorbelegt, sofern die App keine Pflichtangabe verlangt. |
+| 2 | Ein Deployment, bei dem keine Einstellung geändert wird, läuft erfolgreich durch. |
+| 3 | Die verwendeten Standardwerte sind vor dem Start sichtbar. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
+
+<a id="it-2b"></a>
+
+#### IT-2b · Eigene Betriebssystem-/Software-Konfiguration
+
+| | |
+|---|---|
+| **Als** | IT Dozent |
+| **möchte ich** | bei Bedarf eine bestimmte Betriebssystem-/Software-Konfiguration bereitstellen, |
+| **damit** | die Umgebung zu den Inhalten meiner Lehrveranstaltung passt. |
+
+**Akzeptanzkriterien**
+
+| # | Kriterium |
+|:-:|---|
+| 1 | Die App-Version ist frei wählbar. |
+| 2 | Betriebssystem-Image und VM-Größe und weitere Einstellungen lassen sich anpassen, sofern die App das vorsieht. |
+| 3 | Ungültige Eingaben oder fehlende Pflichtangaben werden vor dem Start mit einer verständlichen Meldung abgelehnt. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
 <a id="it-3"></a>
 
@@ -86,9 +137,18 @@
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Beim Deployment lässt sich wählen, ob alle Studierenden eine gemeinsame VM nutzen oder jeder eine eigene VM erhält. |
+| 2 | Vor dem Start wird angezeigt, wie viele VMs entstehen. |
+| 3 | Studierende erhalten nur Zugang zu der Umgebung, der sie zugeordnet sind. |
+| 4 | Die freien Ressourcen (Quota) sind beim Deployment einsehbar. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| teilweise | ja | ja | ja | ja | ja |
+
+Anmerkung: Story baut auf der Gruppenzuordnung aus IT-4 auf.
 
 <a id="it-4"></a>
 
@@ -97,15 +157,23 @@
 | | |
 |---|---|
 | **Als** | IT Dozent |
-| **möchte ich** | mehrere VMs für unterschiedliche Gruppen bereitstellen und möchte deshalb auswählen, welche Studierenden in welcher Gruppe sind. |
+| **möchte ich** | mehrere VMs für unterschiedliche Gruppen bereitstellen und möchte deshalb auswählen, welche Studierenden in welcher Gruppe sind, |
+| **damit** | jede Gruppe gemeinsam in ihrer eigenen Umgebung arbeiten kann. |
 
 **Akzeptanzkriterien**
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Beim Deployment lassen sich mehrere Gruppen (Teams) anlegen und benennen. |
+| 2 | Jeder Studierende des Kurses lässt sich genau einer Gruppe zuordnen. |
+| 3 | Studierende ohne Gruppe werden vor dem Start angezeigt. |
+| 4 | Die Mitglieder einer Gruppe arbeiten gemeinsam in derselben Umgebung. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
 <a id="it-5"></a>
 
@@ -121,9 +189,18 @@
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Ein Deployment führt durch wenige, klar erkennbare Schritte. |
+| 2 | Man kann zwischen den Schritten zurückgehen, ohne Eingaben zu verlieren. |
+| 3 | Fehlende Angaben werden direkt im jeweiligen Schritt angezeigt. |
+| 4 | Fachbegriffe aus OpenStack oder Terraform erscheinen nicht ohne Erklärung. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | teilweise | ja | teilweise |
+
+Anmerkung: „einfach“ ist nicht messbar — die Story ist eher eine Qualitätsanforderung an alle anderen Stories, erst die Kriterien machen sie prüfbar. Überschneidet sich mit BWL-6.
 
 <a id="it-6"></a>
 
@@ -139,10 +216,16 @@
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Die VMs eines Deployments liegen in einem gemeinsamen Netzwerk und erreichen sich gegenseitig über ihre privaten IP-Adressen. |
+| 2 | Die IP-Adressen aller VMs eines Deployments sind für die Lehrperson in der Infrastruktur-Ansicht sichtbar. |
 
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| teilweise | ja | ja | ja | ja | ja |
+
+Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vernetzt / getrennt) -> sollten zusammen umgesetzt werden.
 ---
 
 ## BWL Dozent
