@@ -21,6 +21,20 @@
 
 ---
 
+## INVEST
+
+| | Begriff | Prüffrage |
+|---|---|---|
+| **I** | Independent | Lässt sich die Story umsetzen, ohne dass eine andere vorher fertig sein muss? |
+| **N** | Negotiable | Beschreibt sie *was* gebraucht wird, nicht schon *wie* es technisch gelöst wird? |
+| **V** | Valuable | Hat sie einen erkennbaren Nutzen für die Rolle? |
+| **E** | Estimable | Ist sie klar genug, dass das Team den Aufwand abschätzen kann? |
+| **S** | Small | Ist sie klein genug für einen Sprint, oder stecken mehrere Funktionen darin? |
+| **T** | Testable | Lässt sich eindeutig prüfen, ob sie erfüllt ist? |
+
+
+---
+
 ## IT Dozent
 
 <a id="it-1"></a>
