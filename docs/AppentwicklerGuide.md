@@ -1,18 +1,13 @@
 # App-Entwickler-Anleitung
 
-Diese Anleitung richtet sich an App-Entwickler, die eine App für die Click-n-Deploy-Plattform bauen wollen. Sie beschreibt alle Anforderungen und Möglichkeiten — von der minimalen App bis hin zu erweiterten Funktionen wie Packer-Images, User-Management und File-Uploads.
+Diese Anleitung richtet sich an App-Entwickler — in der Regel Dozenten —, die eine eigene App für die Click-n-Deploy-Plattform bauen wollen, z. B. eine vorkonfigurierte Linux- oder Windows-Lernumgebung für ihren Kurs. Sie beschreibt alle Anforderungen und Möglichkeiten — von der minimalen App bis hin zu erweiterten Funktionen wie Packer-Images, User-Management, File-Uploads und Windows-VMs.
 
 ### Autoren
-1. **Iven Stahl** 
-2. **Leon Priemer** 
+1. **Erik Breuer**
 
 ### Reviewer (Prüfer)
-1. **Luca Baeck**
-2. **Okan Soenmez**
-3. **Paulina Clauss**
-4. **Tom Weber**
-5. **Max Meinel**
-6. **Monika Pjano**
+
+> Zuletzt bearbeitet: 26.10.2026
 
 
 ---
@@ -23,6 +18,8 @@ Eine App ist ein **Git-Repository** (GitHub oder GitLab) mit einem `terraform/`-
 
 Die Plattform klont das Repo bei jedem Deploy auf einen versionierten Git-Tag, baut ggf. die in `packer/` definierten Images und wendet den `terraform/`-Plan gegen das OpenStack-Backend an. Die durch Terraform exportierten Outputs werden vom Backend gelesen, um Zugangsdaten an Endnutzer zu mailen und das Infrastruktur-Panel im UI zu befüllen.
 
+> **Hinweis:** Die Plattform führt den `terraform/`-Code intern mit **OpenTofu** aus, einem zu Terraform kompatiblen Fork. Für die App-Entwicklung ändert das nichts — lokal kann ganz normal mit Terraform gearbeitet werden.
+
 ---
 
 ## 2. Voraussetzungen für lokale Entwicklung
@@ -30,6 +27,7 @@ Die Plattform klont das Repo bei jedem Deploy auf einen versionierten Git-Tag, b
 - **Terraform** >= 1.5
 - **Packer** >= 1.9 (nur wenn ein eigenes Image gebaut wird)
 - **OpenStack-Zugang** (`clouds.yaml`)
+- **RDP-Client** (nur für Windows-Apps), z. B. „Windows App" bzw. Microsoft Remote Desktop unter macOS, `mstsc` unter Windows
 
 ### Installation (macOS)
 
@@ -121,6 +119,31 @@ template-app/
 ```
 
 Das Template setzt bereits **User-Management** und ein **Single-Packer-Image** um — beides ist optional und kann entfernt werden, wenn es nicht benötigt wird.
+
+#### Welches Template?
+
+| Template | Betriebssystem | Zugang für Endnutzer | Wann verwenden? |
+|---|---|---|---|
+| `template-app` | Linux (Ubuntu 22.04) | Web-URL oder SSH | Webanwendungen, Terminal-Umgebungen, Server-Software |
+| `windows-template` | Windows 11 | Remote Desktop (RDP) | Windows-Software, z. B. Statistik- oder Entwicklungsprogramme |
+
+
+> **Tipp:** Wer wenig Erfahrung mit Terraform hat, kann sich von einem KI-Assistenten durch die Erstellung der App führen lassen — siehe Abschnitt 11. Die Anforderungen dieser Anleitung gelten trotzdem.
+
+#### Bestehende Apps als Vorlage
+
+Neben den Templates eignen sich die bereits vorhandenen Apps der Organisation als Nachschlagewerk für typische Anwendungsfälle:
+
+| App | OS | Packer | Zugang | VM-Aufteilung | Interessant für |
+|---|---|---|---|---|---|
+| `Ubuntu-App` | Linux | ja | SSH | eine gemeinsame VM | Linux-Account pro Nutzer auf einer VM |
+| `Jupyter-Notebook` | Linux | ja | Web | eine gemeinsame VM | Web-Login pro Nutzer (JupyterHub) |
+| `pgAdmin` | Linux | ja | Web | eine VM pro Team | Webanwendung mit Datenbank |
+| `Web-LaTeX` | Linux | ja | Web | eine VM pro Team | Datei-Upload pro Team (ZIP) |
+| `Online-IDE` | Linux | ja | Web | eine VM pro Team | eigene Security Group, Flavor pro Team, Datei-Upload |
+| `Kubernetes-App` | Linux | ja | SSH + API | ein k3s-Cluster auf einer VM | komplexe Umgebung mit eigenem CLI |
+| `Windows-App` | Windows | nein | RDP | eine VM pro Team | Software-Installation unter Windows |
+| `windows-spss` | Windows | nein | RDP | eine VM pro Team | Datei-Upload unter Windows (ZIP + Datensatz) |
 
 ### Option B: Eigenes Repository ohne Template
 
@@ -262,7 +285,17 @@ variable "image_name" {
 }
 ```
 
-Der AppStore setzt diesen Wert automatisch auf den Namen des gebauten Packer-Images. Die Variable darf nicht im Deployment-Wizard erscheinen — dafür sorgt der `@platform:internal`-Marker (siehe Abschnitt 5.3).
+Der AppStore setzt diesen Wert automatisch auf den Namen des gebauten Packer-Images. Die Variable darf nicht im Deployment-Wizard erscheinen — dafür sorgt der `@platform:internal`-Marker (siehe Abschnitt 6.3).
+
+**Apps ohne Packer**, die ein bereits in OpenStack vorhandenes Image nutzen (z. B. `Windows-App` oder `windows-spss` mit „Windows 11 25H2 (UEFI)"), bekommen **keinen** `image_name` vom AppStore injiziert. Hier wird der Image-Name als `default` der Variable gesetzt — dieser Default ist dann der tatsächlich verwendete Wert:
+
+```hcl
+variable "image_name" {
+  description = "Glance-Image-Name des bestehenden Images. @platform:internal"
+  type        = string
+  default     = "Windows 11 25H2 (UEFI)"
+}
+```
 
 ---
 
@@ -438,6 +471,13 @@ output "user_accounts" {
 | `oauth`    | "Login at …"-Link              | Login-URL                  |
 | `none`     | Kein Credential-Block          | `auth` kann fehlen         |
 
+**Optionale Felder** in `user_accounts`, die das Infrastruktur-Panel auswertet:
+
+| Feld       | Bedeutung |
+|------------|-----------|
+| `ip_v6`    | IPv6-Adresse der VM des Nutzers. Ist sie gesetzt, kann der Nutzer im Panel zwischen IPv4 und IPv6 umschalten (siehe „Dual-Stack" unten). |
+| `authtype` | Art des Zugangs: `ssh`, `rdp` oder `url`. Bei `rdp` zeigt das Panel einen fertigen `mstsc`-Befehl und den Benutzernamen zum Kopieren an (siehe Abschnitt 6.6). |
+
 #### `metadata.team` auf VM-Ressourcen
 
 Damit der AppStore VMs im Infrastruktur-Panel dem richtigen Team zuordnet, **sollte** jede VM ein `metadata`-Tag mit dem Team-Key erhalten:
@@ -464,6 +504,7 @@ Der `team_vms`-Output befüllt das Infrastruktur-Panel im AppStore. Damit der Ap
 |---|---|---|
 | Webanwendung | `url` | `"http://141.72.13.1:8080"` |
 | SSH-Zugang | `ssh_command` | `"ssh alice@141.72.13.1"` |
+| Remote Desktop (Windows) | — (über `user_accounts` mit `authtype = "rdp"`) | — |
 
 Andere Feldnamen werden im Panel zwar angezeigt, aber **nicht** als klickbarer Link bzw. kopierbarer SSH-Befehl hervorgehoben.
 
@@ -484,6 +525,33 @@ output "team_vms" {
     for team in local.teams_list : team => {
       ssh_command = "ssh ubuntu@${openstack_networking_floatingip_v2.team_fip[team].address}"
       floating_ip = openstack_networking_floatingip_v2.team_fip[team].address
+    }
+  }
+}
+```
+
+#### Dual-Stack (IPv4 + IPv6) über das Netz `DHBWV6`
+
+Das Netz `DHBWV6` ist dual-stack: ein v4-Subnetz (DHCP) und ein v6-Subnetz
+(`dhcpv6-stateful`) hängen am selben Neutron-Netz. Jeder Port, der an
+`DHBWV6` angeschlossen wird, bekommt automatisch **beide** Fixed-IPs — kein
+Vorab-Port-Trick nötig (die explizite Port-Erstellung *vor* dem VM-Start, wie
+sie `Windows-App` nutzt, ist nur ein Workaround für Windows-Gäste, deren
+DHCPv6-Client auf dem virtIO-Adapter nicht zuverlässig funktioniert; für
+Linux-Gäste reicht `network_uuid` auf `DHBWV6` zu setzen).
+
+Damit der AppStore die IPv6-Adresse anzeigen kann, **sollte** `team_vms` (und
+optional `user_accounts`) zusätzlich ein `fixed_ip_v6`-Feld (bzw. `ip_v6` in
+`user_accounts`) führen — als Sibling-Feld neben dem bestehenden
+`fixed_ip`/`ip`, kein Pflichtfeld, aber empfohlene Konvention:
+
+```hcl
+output "team_vms" {
+  value = {
+    for team in local.teams_list : team => {
+      fixed_ip    = openstack_compute_instance_v2.team_vm[team].network[0].fixed_ip_v4
+      fixed_ip_v6 = openstack_compute_instance_v2.team_vm[team].network[0].fixed_ip_v6
+      floating_ip = local.enable_floating_ip ? openstack_networking_floatingip_v2.team_fip[team].address : null
     }
   }
 }
@@ -609,6 +677,10 @@ Mit dem `@openstack:file:`-Marker kann der App-Entwickler Datei-Uploads im AppSt
 
 File-Marker sind in Packer-Variablen **verboten**.
 
+#### Größenbeschränkung
+
+Der AppStore akzeptiert maximal **2 MB pro Datei** und **10 MB pro Deployment**. Entscheidend ist in der Praxis aber eine andere Grenze: Wird der Dateiinhalt (wie in den Beispielen unten) über das cloud-init- bzw. cloudbase-init-Template auf die VM gebracht, landet er in den `user_data` der VM — und OpenStack begrenzt `user_data` auf **ca. 64 KB**. Ist das Template größer, startet die VM nicht. Über diesen Weg eignen sich daher nur **kleine Dateien** (z. B. eine Aufgabenstellung als PDF oder ein kleines ZIP). Für größere Dateien vorher mit dem Plattform-Team einen anderen Weg klären.
+
 #### HCL-Typen je Scope
 
 | Scope  | HCL-Typ |
@@ -646,6 +718,8 @@ write_files:
     content: ${file.content_b64}
 %{ endfor ~}
 ```
+
+Bei Windows-Apps werden die Dateien stattdessen im `cloudbase-init.txt.tpl` per PowerShell geschrieben — ein fertiges Beispiel (Ablage auf dem öffentlichen Desktop, ZIPs werden entpackt) enthält das `windows-template`.
 
 #### Beispiel: Ein Slot pro Team
 
@@ -729,6 +803,112 @@ variable "image_name_database" {
   type        = string
 }
 ```
+
+---
+
+### 6.6 Windows-Apps (RDP)
+
+Für Software, die nur unter Windows läuft, können Apps auch Windows-11-VMs bereitstellen. Endnutzer greifen dann per **Remote Desktop (RDP, Port 3389)** auf einen vollständigen Windows-Desktop zu. Als Startpunkt dient das `windows-template` (siehe Abschnitt 3); es ist aus der getesteten `Windows-App` abgeleitet.
+
+#### Unterschiede zu Linux-Apps
+
+| | Linux-App (`template-app`) | Windows-App (`windows-template`) |
+|---|---|---|
+| Image | per Packer gebautes Image | per Packer gebautes Image auf Basis von „Windows 11 25H2 (UEFI)" |
+| Packer-Verbindung | SSH | **WinRM über HTTPS (Port 5986)**, temporärer Admin `packer` |
+| `image_name` | vom AppStore injiziert | vom AppStore injiziert |
+| Boot-Konfiguration | `user-data.yaml.tpl` (cloud-init, YAML) | `cloudbase-init.txt.tpl` (cloudbase-init, PowerShell) |
+| Software | im Packer-Image vorinstalliert (`provision.sh`) | im Packer-Image vorinstalliert (`provision.ps1`) |
+| Flavor | z. B. `gp1.small` | mind. `win11.medium` (8 GB RAM, 2 vCPU, 80 GB) |
+| Zugang | `url` / `ssh_command` | `user_accounts` mit `authtype = "rdp"`, `port = 3389` |
+| Bereitstellungsdauer | wenige Minuten | Image-Build ca. 20–40 Min (einmal pro Tag), danach ca. 4–6 Min bis RDP erreichbar |
+
+#### Struktur
+
+```
+my-windows-app/
+├── packer/
+│   ├── template.pkr.hcl          # Image-Build über WinRM
+│   ├── variables.pkr.hcl         # image_name, networks, security_groups
+│   └── scripts/
+│       ├── bootstrap-winrm.ps1.pkrtpl  # user_data der Build-VM: WinRM an
+│       ├── provision.ps1         # Software ins Image installieren
+│       └── cleanup.ps1           # Aufräumen vor dem Snapshot
+├── terraform/
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   └── cloudbase-init.txt.tpl    # PowerShell-Script für den ersten Boot
+├── .github/workflows/            # packer.yml + terraform.yml
+├── .gitattributes                # LF-Zeilenenden für .tf/.tpl/.ps1
+└── README.md
+```
+
+Faustregel: **Was für alle VMs gleich ist (Software), gehört ins Packer-Image. Was pro Deployment/Team anders ist (Nutzer, Passwörter, IPv6, Uploads), gehört in `cloudbase-init.txt.tpl`.**
+
+#### Packer-Build (`packer/`)
+
+1. Packer startet eine Build-VM aus „Windows 11 25H2 (UEFI)". Über `user_data` legt cloudbase-init dort den temporären Admin `packer` an (Passwort pro Build zufällig) und öffnet **WinRM über HTTPS (Port 5986)** — das Windows-Gegenstück zu SSH.
+2. Packer verbindet sich per WinRM, führt `provision.ps1` aus, startet neu und räumt mit `cleanup.ps1` auf.
+3. Der Snapshot wird als Glance-Image gespeichert; die UEFI-Properties (`hw_firmware_type`, `hw_machine_type`) setzt das Template explizit.
+4. Beim Deploy entfernt `cloudbase-init.txt.tpl` den Account `packer`, den WinRM-Listener und die Firewallregel wieder.
+
+Als App-Entwickler wird in der Regel nur der Block zur **Software-Installation** in `packer/scripts/provision.ps1` angepasst — ein Block pro Programm, idempotent und mit stiller Installation:
+
+```powershell
+$exe = "$env:ProgramFiles\Microsoft VS Code\Code.exe"
+if (-not (Test-Path $exe)) {
+    $installer = "$env:TEMP\vscode-setup.exe"
+    Invoke-WebRequest -Uri "https://update.code.visualstudio.com/latest/win32-x64/stable" -OutFile $installer -UseBasicParsing
+    Start-Process -FilePath $installer -ArgumentList "/VERYSILENT", "/NORESTART" -Wait -NoNewWindow
+    if (-not (Test-Path $exe)) { throw "VS Code installation failed" }
+}
+```
+
+- **System-Installer** verwenden (nicht „User Installer"), damit die Software allen Nutzern der VM zur Verfügung steht — die Nutzer-Accounts entstehen erst beim Deploy.
+- Fehler mit `throw` abbrechen lassen: Dann schlägt der Build sichtbar fehl, statt ein Image ohne Software zu erzeugen.
+- Die Build-VM braucht eine Security Group mit **eingehend TCP 5986** (Default im Template: `packer-winrm`). Die deployten VMs brauchen weiterhin nur RDP.
+- **Kein Sysprep:** cloudbase-init führt `user_data` pro neuer OpenStack-Instanz erneut aus; alle VMs teilen sich dadurch die Maschinen-SID (ohne Domäne unkritisch).
+- Der gesamte Build muss in das **60-Minuten-Timeout** des Workers passen — bei sehr großer Software (Visual Studio, Office, SQL Server) vorher mit dem Plattform-Team sprechen.
+
+#### `terraform/cloudbase-init.txt.tpl`
+
+Das Script beginnt mit `#ps1_sysnative` und wird wie bei Linux über `templatefile()` in `main.tf` gerendert. Das Template legt bereits die lokalen Windows-Accounts an, aktiviert RDP, entfernt die Packer-Build-Artefakte, legt hochgeladene Dateien ab und setzt die IPv6-Adresse. Hier wird in der Regel nichts angepasst — Software gehört ins Packer-Image.
+
+- PowerShell-Variablen **ohne** geschweifte Klammern schreiben (`$env:TEMP`) — Terraform interpretiert `${...}` im Template selbst.
+- Fehler landen auf der VM in `C:\cloudbase-init-app.log` (einsehbar über die OpenStack-Konsole).
+- **Lizenzpflichtige Software** (Installer, Lizenzschlüssel) nie im Repository hinterlegen, sondern mit dem Plattform-Team klären.
+
+#### Output `user_accounts` für RDP
+
+```hcl
+output "user_accounts" {
+  sensitive = true
+  value = {
+    for uid, user in local.users_map : uid => {
+      type     = "password"
+      authtype = "rdp"
+      ip       = local.access_ip[user.team]
+      ip_v6    = local.fixed_ip_v6[user.team]
+      port     = 3389
+      username = user.username
+      auth     = random_password.user_passwords[uid].result
+    }
+  }
+}
+```
+
+Das Infrastruktur-Panel zeigt damit pro Nutzer einen kopierbaren `mstsc`-Befehl (IPv4 oder IPv6) und den Benutzernamen an; das Passwort kommt per Mail.
+
+#### Windows-spezifische Fallstricke
+
+Die folgenden Punkte sind im `windows-template` bereits gelöst und sollten beim Anpassen **nicht** verändert werden. Eine ausführliche Erklärung steht im README des Templates.
+
+- Benutzernamen ohne Punkte und mit max. 20 Zeichen (Windows-Limit)
+- Passwörter ohne `$`, `` ` ``, `"`, `'` (brechen die PowerShell-Interpolation)
+- Gruppen und Firewall-Regeln sprachunabhängig über SIDs bzw. Gruppen-Token (deutsches und englisches Windows)
+- IPv6 wird statisch gesetzt, da DHCPv6 für Windows-Gäste im Netz `DHBWV6` nicht zuverlässig funktioniert — dafür wird der Port **vor** der VM angelegt
+- Die im Wizard gewählte Security Group (`shared_secgroup_id`) **muss** TCP 3389 für IPv4 und IPv6 erlauben
 
 ---
 
@@ -827,11 +1007,13 @@ Wer das Template der Organisation nutzt, erhält automatisch zwei vorkonfigurier
 
 Diese Workflows laufen automatisch bei jedem Push. Schlägt einer der Checks fehl, wird der Workflow als fehlgeschlagen markiert.
 
+Das `windows-template` enthält beide Workflows.
+
 ---
 
 ## 10. App dem AppStore hinzufügen
 
-## Push auf GitHub
+### Push auf GitHub
 
 Bevor die App auf GitHub gepusht wird sollte eine Markdown-Datei erstellt oder die Markdown-Datei des Templates bearbeitet werden. Diese Datei sollte die App beschreiben und alle wichtigen Details für App-Entwickler umfassen.
 
@@ -874,3 +1056,32 @@ Bei der Registrierung und bei jedem neuen Release **muss** eine umfassende Besch
 - **VM-Deployment:** Wie viele VMs werden deployed? (z.B. eine VM pro Team, eine VM pro User, eine gemeinsame VM)
 - **Konfigurierbare Variablen:** Welche Variablen kann der Deployer konfigurieren und wie werden diese befüllt? (z.B. Flavor-Auswahl, Netzwerk, Datei-Upload)
 - **Änderungen im Release:** Was wurde in dieser Version geändert oder hinzugefügt?
+
+---
+
+## 11. KI-Assistent: App-Wizard-Skill
+
+Für App-Entwickler ohne Terraform-Kenntnisse gibt es den **App-Wizard** — einen Skill für den KI-Coding-Assistenten [Claude Code](https://docs.claude.com/en/docs/claude-code/overview). Er stellt in Alltagssprache einige Fragen (Wofür ist die App? Welche Software? Datei-Upload?), leitet daraus ab, ob eine Linux-App (SSH oder Web) oder eine Windows-App (RDP) passt, erzeugt das App-Repository auf Basis von `template-app` bzw. `windows-template` und führt anschließend durch Commit, Push, Versions-Tag und Registrierung im AppStore.
+
+### Nutzung
+
+```bash
+git clone https://github.com/NextAppStore/template-app
+cd template-app
+claude
+```
+
+Danach im Chat z. B. *„Ich möchte eine neue App für meine Statistik-Vorlesung erstellen"* eingeben oder den Skill direkt mit `/app-wizard` aufrufen. Der Skill findet die übrigen Templates und Beispiel-Apps im selben bzw. übergeordneten Verzeichnis und fragt nach, bevor er fehlende Repositories klont oder Befehle (z. B. `git push`) ausführt.
+
+### Grenzen — keine Garantie
+
+Der App-Wizard ist eine **Hilfe beim Einstieg, kein geprüftes Werkzeug**. Die erzeugte App kann Fehler enthalten; die Verantwortung für die App bleibt beim App-Entwickler. Insbesondere gilt:
+
+- **Kein eigener Test:** Der Skill selbst prüft höchstens die Syntax (`terraform validate`). Ob die VM startet, die Software installiert wird und der Zugang funktioniert, zeigt erst ein Deployment. Vor dem ersten Release **muss** die App deshalb mit einem Test-Team (ein Nutzer) deployt und geprüft werden. Auf Wunsch begleitet der Skill ein solches Test-Deployment vom Terminal: Er prüft, ob Terraform (und ggf. Packer) installiert sind, und gibt die nötigen Befehle zum Kopieren aus — **ausgeführt werden sie vom App-Entwickler selbst**, der Skill legt keine Ressourcen in OpenStack an.
+- **Unbekannte Software:** Für Software, die in keiner bestehenden App vorkommt, beruht die Installation auf dem allgemeinen Wissen des KI-Modells und ist nicht erprobt. Der Skill weist darauf hin — die README der App sollte das unter „Bekannte Einschränkungen" festhalten.
+- **Lizenzpflichtige Software** (z. B. SPSS, Office, MATLAB): Installer-Quelle und Lizenz kann der Skill nicht bereitstellen; diese müssen vom App-Entwickler bzw. Plattform-Team kommen und dürfen nicht ins Repository.
+- **Nur Standardfälle:** Der Skill deckt die Muster der Templates ab (eine VM pro Team, Datei-Upload, Software-Installation). Sonderfälle wie mehrere Images, Kubernetes oder eigene Netzwerke erzeugt er nicht oder nur eingeschränkt — hier dienen die bestehenden Apps (Abschnitt 3) und diese Anleitung als Grundlage.
+- **Windows:** Windows-Apps übernehmen den Packer-Build aus dem `windows-template` (WinRM). Der Build dauert deutlich länger als bei Linux (ca. 20–40 Min) und muss in das 60-Minuten-Timeout des Workers passen; sehr große Software vorher mit dem Plattform-Team klären.
+- **Abhängigkeit vom Modell:** Ergebnisse können sich je nach Modellversion und Gesprächsverlauf unterscheiden. Für die Nutzung ist ein Zugang zu Claude Code nötig.
+
+Maßgeblich bleiben immer diese Anleitung und die `AGENTS.md` des jeweiligen Templates.
