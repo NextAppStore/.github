@@ -226,6 +226,7 @@ Anmerkung: „einfach“ ist nicht messbar — die Story ist eher eine Qualität
 | teilweise | ja | ja | ja | ja | ja |
 
 Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vernetzt / getrennt) -> sollten zusammen umgesetzt werden.
+
 ---
 
 ## BWL Dozent
