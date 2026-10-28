@@ -18,6 +18,7 @@
 | [BWL-4](#bwl-4) | BWL Dozent | VMs nicht vernetzen |
 | [BWL-5](#bwl-5) | BWL Dozent | Übungsdatensätze zentral ablegen |
 | [BWL-6](#bwl-6) | BWL Dozent | Bedienung ohne technische Vorkenntnisse |
+| [ADMIN-1](#admin-1) | Administrator | Integration in den Self-Service |
 
 ---
 
