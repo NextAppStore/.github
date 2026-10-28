@@ -247,10 +247,10 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 | # | Kriterium |
 |:-:|---|
 | 1 | Der Dozent kann vor dem Starten eines Deployments eine Detailseite der App aus dem Katalog aufrufen. |
-| 2 | Die Detailseite enthält eine verständliche Beschreibung, die den fachlichen Einsatzzweck, das Lehrszenario und die vorinstallierten Programme der Lernumgebung erklärt. |
-| 3 | Für den Dozenten ist ersichtlich, für welches Lehrformat die App empfohlen wird und ob sie für Einzel- oder Gruppenarbeit ausgelegt ist. |
-| 4 | Besondere organisatorische oder inhaltliche Voraussetzungen für den Kurs werden als Hinweise verständlich aufgeführt. |
-| 5 | Der Dozent kann die gewünschte Version der App über eine einfache Auswahlliste festlegen, ohne technische Details (wie Commit-Hashes) kennen zu müssen. |
+| 2 | Die Detailseite zeigt eine verständliche Beschreibung, die den fachlichen Zweck der Lernumgebung und die vorgesehenen Einsatzszenarien für Studierende erläutert. |
+| 3 | Ist für eine App noch keine Beschreibung hinterlegt, wird ein sauberer Hinweistext („Keine Beschreibung verfügbar“) angezeigt, anstatt fehlerhafte oder leere Bereiche darzustellen. |
+| 4 | Der Dozent kann die gewünschte Version der App über ein einfaches Auswahlmenü festlegen. |
+| 5 | Aus der Detailansicht heraus kann der Dozent direkt das Deployment starten (über „Schnell-Deploy“ für den Sofortstart oder „Jetzt Deployen“ für individuelle Einstellungen). |
 
 **INVEST**
 
