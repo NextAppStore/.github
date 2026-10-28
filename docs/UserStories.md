@@ -248,9 +248,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 |:-:|---|
 | 1 | Der Dozent kann vor dem Starten eines Deployments eine Detailseite der App aus dem Katalog aufrufen. |
 | 2 | Die Detailseite zeigt eine verständliche Beschreibung, die den fachlichen Zweck der Lernumgebung und die vorgesehenen Einsatzszenarien für Studierende erläutert. |
-| 3 | Ist für eine App noch keine Beschreibung hinterlegt, wird ein sauberer Hinweistext („Keine Beschreibung verfügbar“) angezeigt, anstatt fehlerhafte oder leere Bereiche darzustellen. |
-| 4 | Der Dozent kann die gewünschte Version der App über ein einfaches Auswahlmenü festlegen. |
-| 5 | Aus der Detailansicht heraus kann der Dozent direkt das Deployment starten (über „Schnell-Deploy“ für den Sofortstart oder „Jetzt Deployen“ für individuelle Einstellungen). |
+| 3 | Der Dozent kann die gewünschte Version der App über ein einfaches Auswahlmenü festlegen. |
 
 **INVEST**
 
@@ -273,9 +271,9 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 | # | Kriterium |
 |:-:|---|
 | 1 | Auf jeder App-Kachel im Katalog steht eine Schaltfläche für den Schnell-Deploy zur Verfügung. |
-| 2 | Ein Klick auf Schnell-Deploy öffnet einen kompakten Auswahldialog für den Zielkurs oder die Option „Nur ich“. |
+| 2 | Ein Klick auf Schnell-Deploy öffnet einen kompakten Auswahldialog für den Zielkurs oder Dozenten. |
 | 3 | Alle Konfigurationsvariablen werden automatisch mit den Standardwerten der App belegt und der mehrstufige Wizard wird direkt zur Zusammenfassungsseite übersprungen. |
-| 4 | Verlangt eine App zwingende Pflichtangaben ohne Standardwert (z. B. eigene Aufgabendateien), wird der Dozent mit einem Hinweis in den regulären Konfigurations-Wizard geleitet. |
+| 4 | Verlangt eine App zwingende Pflichtangaben ohne Standardwert, wird der Dozent mit einem Hinweis in den regulären Konfigurations-Wizard geleitet. |
 | 5 | Vom Klick auf die App-Kachel bis zum Starten des Deployments sind maximal 2 bis 3 Klicks erforderlich. |
 
 **INVEST**
@@ -284,7 +282,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 |:-:|:-:|:-:|:-:|:-:|:-:|
 | ja | ja | ja | ja | ja | ja |
 
-Anmerkung: „mit wenigen Klicks“ ist für sich nicht messbar — Kriterium 5 (maximal 2–3 Klicks) macht es prüfbar.
+Anmerkung: „mit wenigen Klicks“ ist für sich nicht messbar — Kriterium 5 macht es prüfbar.
 
 <a id="bwl-3"></a>
 
@@ -300,10 +298,10 @@ Anmerkung: „mit wenigen Klicks“ ist für sich nicht messbar — Kriterium 5 
 
 | # | Kriterium |
 |:-:|---|
-| 1 | Variablen, für die der App-Entwickler Standardwerte definiert hat, sind im Konfigurationsschritt vorausgefüllt. |
-| 2 | In Auswahllisten (z. B. VM-Flavors, Netzwerke) ist die empfohlene Standardoption mit einem gut sichtbaren „Empfohlen“-Badge markiert und wird an oberster Stelle einsortiert. |
+| 1 | Variablen, für die der App-Entwickler Standardwerte definiert hat, sind im Konfigurations-Wizard vorausgefüllt. |
+| 2 | In Auswahllisten ist die empfohlene Standardoption mit einem gut sichtbaren Badge markiert. |
 | 3 | Tooltips bzw. Hilfefelder erklären den Zweck technischer Einstellungen in verständlicher Sprache. |
-| 4 | Alle optionalen Einstellungen mit funktionierenden Standardwerten sind standardmäßig in einem Bereich „Erweiterte Einstellungen“ eingeklappt, sodass die Ansicht für Dozenten übersichtlich bleibt. |
+| 4 | Alle optionalen Einstellungen mit funktionierenden Standardwerten sind standardmäßig eingeklappt, sodass die Ansicht für Dozenten übersichtlich bleibt. |
 
 **INVEST**
 
