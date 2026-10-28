@@ -40,7 +40,7 @@
 
 <a id="it-1"></a>
 
-### IT-1 · VM schnell bereitstellen
+### IT-1 - VM schnell bereitstellen
 
 | | |
 |---|---|
@@ -68,7 +68,7 @@ Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-De
 
 <a id="it-2"></a>
 
-### IT-2 · Standardeinstellungen oder eigene Konfiguration
+### IT-2 - Standardeinstellungen oder eigene Konfiguration
 
 | | |
 |---|---|
@@ -77,7 +77,7 @@ Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-De
 
 <a id="it-2a"></a>
 
-#### IT-2a · Funktionierende Standardeinstellungen
+#### IT-2a - Funktionierende Standardeinstellungen
 
 | | |
 |---|---|
@@ -101,7 +101,7 @@ Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-De
 
 <a id="it-2b"></a>
 
-#### IT-2b · Eigene Betriebssystem-/Software-Konfiguration
+#### IT-2b - Eigene Betriebssystem-/Software-Konfiguration
 
 | | |
 |---|---|
@@ -125,7 +125,7 @@ Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-De
 
 <a id="it-3"></a>
 
-### IT-3 · Gemeinsame VM oder eigene VM pro Studierendem
+### IT-3 - Gemeinsame VM oder eigene VM pro Studierendem
 
 | | |
 |---|---|
@@ -152,7 +152,7 @@ Anmerkung: Story baut auf der Gruppenzuordnung aus IT-4 auf.
 
 <a id="it-4"></a>
 
-### IT-4 · Studierende Gruppen zuordnen
+### IT-4 - Studierende Gruppen zuordnen
 
 | | |
 |---|---|
@@ -177,7 +177,7 @@ Anmerkung: Story baut auf der Gruppenzuordnung aus IT-4 auf.
 
 <a id="it-5"></a>
 
-### IT-5 · Einfache Bedienoberfläche
+### IT-5 - Einfache Bedienoberfläche
 
 | | |
 |---|---|
@@ -204,7 +204,7 @@ Anmerkung: „einfach“ ist nicht messbar — die Story ist eher eine Qualität
 
 <a id="it-6"></a>
 
-### IT-6 · VMs untereinander vernetzen
+### IT-6 - VMs untereinander vernetzen
 
 | | |
 |---|---|
@@ -233,7 +233,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-1"></a>
 
-### BWL-1 · Informationen vor der Installation
+### BWL-1 - Informationen vor der Installation
 
 | | |
 |---|---|
@@ -251,7 +251,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-2"></a>
 
-### BWL-2 · Mit wenigen Klicks starten
+### BWL-2 - Mit wenigen Klicks starten
 
 | | |
 |---|---|
@@ -269,7 +269,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-3"></a>
 
-### BWL-3 · Empfehlungen und Hilfe bei der Konfiguration
+### BWL-3 - Empfehlungen und Hilfe bei der Konfiguration
 
 | | |
 |---|---|
@@ -287,7 +287,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-4"></a>
 
-### BWL-4 · VMs nicht vernetzen
+### BWL-4 - VMs nicht vernetzen
 
 | | |
 |---|---|
@@ -305,7 +305,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-5"></a>
 
-### BWL-5 · Übungsdatensätze zentral ablegen
+### BWL-5 - Übungsdatensätze zentral ablegen
 
 | | |
 |---|---|
@@ -323,7 +323,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-6"></a>
 
-### BWL-6 · Bedienung ohne technische Vorkenntnisse
+### BWL-6 - Bedienung ohne technische Vorkenntnisse
 
 | | |
 |---|---|
@@ -344,6 +344,26 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 ---
 
-## Admin (ggfs.)
+## Admin
+*Der Administrator verwaltet den AppStore, betreibt diesen und ist Ansprechperson bei technischen Problemen.*
 
+<a id="admin-1"></a>
+
+### ADMIN-1 - Integration in den Self-Service
+| | |
+|---|---|
+| **Als** | Administrator |
+| **möchte ich** | eine nahtlose Integration von ScholarStack in den Self-Service |
+| **damit** | der AppStore automatisch die OpenStack-Kontingente des Nutzers erkennt und mit diesen arbeiten kann. |
+
+**Akzeptanzkriterien**
+
+| # | Kriterium |
+|:-:|---|
+| 1 | ScholarStack unterstützt mehrere OpenStack-Projekte pro Nutzeraccount.  |
+| 2 | ScholarStack kann die Projekte des Nutzers und die Ressourcen dieser aus dem Self-Service auslesen, und diese dem Nutzer anzeigen. |
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
