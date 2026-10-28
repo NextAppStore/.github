@@ -1,6 +1,6 @@
 # Level 1 - System Context
-<img width="100%" alt="Level1-SystemContext" src="https://github.com/user-attachments/assets/e25488e1-fe48-4496-a720-66b3ce31a7b5" />
-<img width="100%" alt="Level1-SystemContext-key" src="https://github.com/user-attachments/assets/144f7528-89d2-4610-a072-d24895cf6bee" />
+<img width="8880" height="8221" alt="finalLevel1-SystemContext" src="https://github.com/user-attachments/assets/1ad7d76e-103d-43a6-a397-ea0d0ce66cdb" />
+<img width="2500" height="500" alt="finalLevel1-SystemContext-key" src="https://github.com/user-attachments/assets/8fa011e7-1c1e-475d-9ef1-dbd5ac4d1ac0" />
 
 <br></br>
 
