@@ -247,9 +247,10 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 | # | Kriterium |
 |:-:|---|
 | 1 | Der Dozent kann vor dem Starten eines Deployments eine Detailseite der App aus dem Katalog aufrufen. |
-| 2 | Auf der Detailseite werden eine fachliche Beschreibung der Software, die VM-Topologie und die Mindestanforderungen an die Hardware (vCPU, RAM, Flavor) angezeigt. |
-| 3 | Versionsangaben, Commit-Hash, Autor, Veröffentlichungsdatum und Release-Hinweise der gewählten Version sind übersichtlich dargestellt. |
-| 4 | Nicht gepflegte optionale Metadaten werden sauber und ohne Darstellungsfehler ausgeblendet. |
+| 2 | Die Detailseite enthält eine verständliche Beschreibung, die den fachlichen Einsatzzweck, das Lehrszenario und die vorinstallierten Programme der Lernumgebung erklärt. |
+| 3 | Für den Dozenten ist ersichtlich, für welches Lehrformat die App empfohlen wird und ob sie für Einzel- oder Gruppenarbeit ausgelegt ist. |
+| 4 | Besondere organisatorische oder inhaltliche Voraussetzungen für den Kurs werden als Hinweise verständlich aufgeführt. |
+| 5 | Der Dozent kann die gewünschte Version der App über eine einfache Auswahlliste festlegen, ohne technische Details (wie Commit-Hashes) kennen zu müssen. |
 
 **INVEST**
 
