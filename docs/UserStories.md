@@ -114,7 +114,7 @@ Anmerkung: „schnell“ ist für sich nicht messbar — Kriterium 3 (Schnell-De
 | # | Kriterium |
 |:-:|---|
 | 1 | Die App-Version ist frei wählbar. |
-| 2 | Betriebssystem-Image und VM-Größe und weitere Einstellungen lassen sich anpassen, sofern die App das vorsieht. |
+| 2 | Betriebssystem-Image und VM-Größe und weitere Einstellungen wie Resourcen lassen sich anpassen, sofern die App das vorsieht. |
 | 3 | Ungültige Eingaben oder fehlende Pflichtangaben werden vor dem Start mit einer verständlichen Meldung abgelehnt. |
 
 **INVEST**
@@ -310,15 +310,15 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 | | |
 |---|---|
 | **Als** | BWL Dozent |
-| **möchte ich** | Übungsdatensätze zentral auf der VM ablegen können, |
-| **damit** | alle Studenten ohne Vorbereitung starten können. |
+| **möchte ich** | Übungsdatensätze in Form von Dateien auf der/den VM/VMs ablegen können, |
+| **damit** | alle Studenten mit diesen Datensätzen starten können. |
 
 **Akzeptanzkriterien**
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
+| 1 | Während des Deployment-Prozess sollen Dateien hochgeladen werden können oder auf einen alternativen Weg verwiesen werden. |
+| 2 | Jede Gruppe hat eine eigene Kopie der Dateien, um nicht die der anderen Gruppe verändern zu können. |
 | 3 | |
 
 <a id="bwl-6"></a>
@@ -335,9 +335,12 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Das Bereitstellen von virtuellen Maschinen soll auf dem "Golden Path" keine technischen Auswahlmöglichkeiten beinhalten, bspw. Security-Groups oder Netzwerke.  |
+| 2 | Technische Begriffe auf der Seite eines Deployments standardmäßig verstecken oder umbennen, wie Git-Repository oder Image-ID. |
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
 ---
 
