@@ -70,6 +70,19 @@ Je App **ein** Deployment mit minimaler Konfiguration (ein Team mit neun Student
 
 ### 2.4 Ressourcenverbrauch (während VM unter Last)
 
+Benchmark-Skript `vm_bench.sh` (sysbench, fio, dd) auf der Ubuntu-VM, 28.10.2026 20:06–20:08 ([Issue #5](https://github.com/NextAppStore/.github/issues/5)).
+
+| Messwert | Ergebnis |
+|---|---|
+| CPU | 1 vCPU, AMD EPYC-Genoa (KVM) |
+| CPU sysbench (1 Thread) | 1742 events/s |
+| RAM gesamt / belegt vor Test | 1,9 GiB / 360 MiB (1,6 GiB verfügbar) |
+| RAM-Durchsatz (sequentiell) | 28.454 MiB/s |
+| Disk gesamt / belegt | 8,7 GB / 2,4 GB (28 %) |
+| Disk zufällig lesen (fio, 4k) | 52,3k IOPS, 204 MiB/s |
+| Disk zufällig schreiben (fio, 4k) | 22,4k IOPS, 87,6 MiB/s |
+| Disk sequentiell schreiben (dd) | 2,4 GB/s |
+
 
 
 ---
