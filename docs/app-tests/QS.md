@@ -1,6 +1,6 @@
 # QS-Protokoll — Performance & Reliability: Deployment-Zeiten in Produktion
 
-> **Projekt:** OpenStack AppStore 
+> **Projekt:** OpenStack AppStore
 > **Qualitätsziel:** Reliability & Performance — VMs starten zuverlässig, keine Downtimes während Vorlesungen
 > **Gemessen wird:** Zeit vom Klick auf „Deploy" bis das Deployment im Frontend als **Active** angezeigt wird.
 
@@ -22,14 +22,14 @@ Je App **ein** Deployment mit minimaler Konfiguration (ein Team mit neun Student
 
 | App | OS | Packer-Build vorhanden | Anzahl VMs | Flavor (nur wenn wählbar) | Dauer „Deploy" → „Active" (mm:ss) | Erfolg? (✔/✘) | Auffälligkeiten |
 |---|---|---|---|---|---|---|---|
-| `Ubuntu-App` | Linux | ja | 1| – | 00:18| Ja | |
-| `Jupyter-Notebook` | Linux | ja | 1| – | 00:17|Ja | |
-| `pgAdmin` | Linux | ja |1 | – | 00:21| Ja| |
-| `Web-LaTeX` | Linux | ja | 1| – | 00:25|Ja | | (6 min wenn Image nicht vorhanden)
-| `Online-IDE` | Linux | ja | 1| mb1.large| 00:25| Ja| |
-| `Kubernetes` | Linux | ja | 1| gp1.large| 00:32| Ja| |
+| `Ubuntu-App` | Linux | ja | 1| – | 00:18| Ja | – |
+| `Jupyter-Notebook` | Linux | ja | 1| – | 00:17|Ja | – |
+| `pgAdmin` | Linux | ja |1 | – | 00:21| Ja| – |
+| `Web-LaTeX` | Linux | ja | 1| – | 00:25|Ja | 6 min wenn Image nicht vorhanden |
+| `Online-IDE` | Linux | ja | 1| mb1.large| 00:25| Ja| – |
+| `Kubernetes` | Linux | ja | 1| gp1.large| 00:32| Ja| – |
 | `Windows-App` | Windows | nein |1 | win11.medium| |Ja | |
-| `windows-spss` | Windows | nein | 1|win11.medium | 00:23| Ja| |
+| `windows-spss` | Windows | nein | 1|win11.medium | 00:23| Ja| – |
 
 > Flavor ist nur bei `Online-IDE`, `Windows-App` und `windows-spss` im Wizard wählbar (Defaults: `gp1.small` = 1 vCPU / 2 GB RAM / 10 GB Disk bzw. `win11.medium` = 2 vCPU / 8 GB RAM / 80 GB Disk). Die anderen Apps haben einen festen Flavor (`gp1.small`).
 
@@ -62,11 +62,11 @@ Je App **ein** Deployment mit minimaler Konfiguration (ein Team mit neun Student
 
 | Prüfung | Ergebnis (✔/✘) | Anmerkung |
 |---|---|---|
-| SSH-Login mit Nutzer-Account funktioniert | | |
-| Linux-Account pro Nutzer wurde angelegt | | |
-| Infrastruktur-Panel im UI zeigt korrekte IP / Outputs | | |
-| Terminal reagiert flüssig | | |
-| Destroy / Löschen funktioniert (Dauer: ) | |00:10 |
+| SSH-Login mit Nutzer-Account funktioniert | ✔ | – |
+| Linux-Account pro Nutzer wurde angelegt | ✔ | – |
+| Infrastruktur-Panel im UI zeigt korrekte IP / Outputs | ✔ | – |
+| Terminal reagiert flüssig | ✔ | – |
+| Destroy / Löschen funktioniert (Dauer: 00:10) | ✔ | – |
 
 ### 2.4 Ressourcenverbrauch (während VM unter Last)
 
@@ -78,9 +78,7 @@ Je App **ein** Deployment mit minimaler Konfiguration (ein Team mit neun Student
 
 | Nr. | App / Lauf | Fehlermeldung / Beobachtung | Behoben? Wie? | GitHub-Issue |
 |---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
+| 1 | Windows-App | Windows-VM schlägt fehl | Nein, noch nicht behoben | [#6](https://github.com/NextAppStore/Windows-App/issues/6) |
 
 ### Leitfragen
 
