@@ -70,7 +70,6 @@ Je App **ein** Deployment mit minimaler Konfiguration (ein Team mit neun Student
 
 ### 2.4 Ressourcenverbrauch (während VM unter Last)
 
-Benchmark-Skript `vm_bench.sh` (sysbench, fio, dd) auf der Ubuntu-VM, 28.10.2026 20:06–20:08 ([Issue #5](https://github.com/NextAppStore/.github/issues/5)).
 
 | Messwert | Ergebnis |
 |---|---|
@@ -99,3 +98,56 @@ Benchmark-Skript `vm_bench.sh` (sysbench, fio, dd) auf der Ubuntu-VM, 28.10.2026
 |---|---|
 | Gab es Timeouts (Terraform, SSH, OpenStack-API)? | Nein|
 
+
+---
+
+## Anhang: Benchmark-Skript (Abschnitt 2.4)
+
+Quelle: [Issue #5](https://github.com/NextAppStore/.github/issues/5). Ausgeführt auf der Ubuntu-VM (`gp1.small`).
+
+```bash
+sudo apt update && sudo apt install -y \
+  stress-ng sysbench fio iperf3 sysstat \
+  dmidecode util-linux procps hdparm lshw
+
+
+cat > ~/vm_bench.sh <<'EOF'
+#!/usr/bin/env bash
+set -u
+OUT=~/vm_report_$(date +%Y%m%d_%H%M%S).txt
+exec > >(tee "$OUT") 2>&1
+log(){ echo -e "\n===== $* =====  [$(date +%T)]"; }
+
+NPROC=$(nproc)
+log "SYSTEM / BASELINE"
+lscpu | grep -E 'Model name|^CPU\(s\)|Thread|Socket|MHz'
+free -h; echo; df -h /; systemd-detect-virt
+
+log "CPU – sysbench (Events/s, höher=besser), $NPROC Threads"
+sysbench cpu --cpu-max-prime=20000 --threads=$NPROC --time=30 run \
+  | grep -E 'events per second|total time'
+
+log "CPU – Single-Core-Referenz (1 Thread)"
+sysbench cpu --cpu-max-prime=20000 --threads=1 --time=15 run \
+  | grep 'events per second'
+
+log "RAM – Durchsatz (MiB/s), sequentiell schreiben"
+sysbench memory --memory-block-size=1M --memory-total-size=10G \
+  --threads=$NPROC run | grep -E 'transferred|per second'
+
+log "DISK – fio zufälliges Lesen/Schreiben (IOPS + MiB/s)"
+fio --name=randrw --rw=randrw --rwmixread=70 --bs=4k \
+  --size=512M --numjobs=1 --iodepth=16 --runtime=30 --time_based \
+  --direct=1 --ioengine=libaio --group_reporting \
+  --directory=$HOME 2>/dev/null \
+  | grep -E 'read:|write:|iops|BW='
+
+log "DISK – sequentieller Durchsatz (dd, MB/s)"
+dd if=/dev/zero of=$HOME/ddtest.bin bs=1M count=1024 oflag=direct 2>&1 | tail -1
+rm -f $HOME/ddtest.bin $HOME/randrw*
+
+log "FERTIG – Report: $OUT"
+EOF
+chmod +x ~/vm_bench.sh
+~/vm_bench.sh
+```
