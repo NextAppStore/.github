@@ -1,19 +1,5 @@
 # Endnutzer Dokumentation
 
-### Autoren
-1. **Tom Weber** *(Dokumentationsteil: Allgemein, Student)*
-2. **Paulina Clauss** *(Dokumentationsteil: Lehrender)*
-3. **Monika Pjano** *(Dokumentationsteil: Admin)*
-
-### Reviewer (Prüfer)
-1. **Luca Baeck**
-2. **Okan Soenmez**
-3. **Leon Priemer**
-4. **Iven Stahl**
-5. **Max Meinel**
-
----
-
 ## 0. Allgemein
 
 **Voraussetzungen für den Systemzugang**
