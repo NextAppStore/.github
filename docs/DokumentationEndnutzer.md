@@ -1,19 +1,5 @@
 # Endnutzer Dokumentation
 
-### Autoren
-1. **Tom Weber** *(Dokumentationsteil: Allgemein, Student)*
-2. **Paulina Clauss** *(Dokumentationsteil: Lehrender)*
-3. **Monika Pjano** *(Dokumentationsteil: Admin)*
-
-### Reviewer (Prüfer)
-1. **Luca Baeck**
-2. **Okan Soenmez**
-3. **Leon Priemer**
-4. **Iven Stahl**
-5. **Max Meinel**
-
----
-
 ## 0. Allgemein
 
 **Voraussetzungen für den Systemzugang**
@@ -63,21 +49,21 @@ Willkommen im App Store! Diese Dokumentation führt dich durch die wichtigsten F
 
 ### Login und Dashboard
 
-Der Einstieg in die Plattform erfolgt über den regulären Login. Du kannst dich entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
+Der Einstieg in die Plattform erfolgt über den regulären Login. Klicke auf der Startseite auf **Mit DHBW anmelden**. Du wirst anschließend zur Keycloak-Anmeldung weitergeleitet und kannst dich dort entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Login.png" alt="Login" width="80%">
+  <img src="img/Login.png" alt="Startseite" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Startseite: Anmeldung über „Mit DHBW anmelden“</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/Login_Keycloak.png" alt="Login" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Keycloak Login</figcaption>
 </figure>
 
 Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst du einen schnellen Überblick über:
 * Deine zugewiesenen Deployments und verfügbaren Apps.
 * Deine verfügbaren und genutzten OpenStack-Ressourcen (z. B. VMs, RAM, Storage, Floating IPs).
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/Dashboard_mit_Credentials.png" alt="Dashboard mit Credentials" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Dashboard: Mit OpenStack-Credentials</figcaption>
-</figure>
 
 **Erstanmeldung:** Wenn du dich zum ersten Mal anmeldest, fehlen dem System noch deine OpenStack-Zugangsdaten. Dies wird dir direkt oben auf dem Dashboard durch einen gelb hinterlegten Hinweis ("OpenStack-Credentials fehlen") signalisiert. Klicke dort auf den Button **Jetzt einrichten**, um deine Daten zu hinterlegen.
 
@@ -91,7 +77,7 @@ Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst
 ### OpenStack-Credentials hinterlegen
 
 Um die Ressourcen der Plattform nutzen zu können, müssen deine Credentials gültig sein. Auf der Einrichtungsseite hast du zwei Möglichkeiten:
-1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region, Username etc.) händisch in die entsprechenden Felder ein.
+1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region etc.) händisch in die entsprechenden Felder ein. Über die Reiter wählst du dabei zwischen **Application Credential** (empfohlen) und **Username & Passwort**.
 2. **Datei-Upload (Empfohlen):** Ziehe einfach deine `clouds.yaml`-Datei per Drag & Drop in das gestrichelte Feld oder klicke auf "Datei auswählen". Die Felder werden daraufhin automatisch ausgefüllt. Du musst lediglich noch dein persönliches Passwort eingeben.
 
 Sobald die Daten gespeichert sind, prüft das System diese. Oben links erscheint ein grüner Status **"Credentials gültig"**. Du kannst die Verbindung jederzeit über den Button **Erneut testen** aktualisieren oder die Daten über **Löschen** komplett entfernen.
@@ -202,11 +188,6 @@ Neben dem Reiter "Übersicht" gibt es für deine eigenen Apps den zusätzlichen 
 * **Status "Öffentlich":** Wechselst du die Sichtbarkeit per Schalter auf "Öffentlich", erscheint unten der Bereich "Freigabe-Status der Versionen". Hier siehst du alle verfügbaren Git-Tags (Versionen) deiner App. Über den Textlink **Zur Prüfung einreichen** kannst du einzelne Versionen an die Administratoren zur Kontrolle senden. Erst nach einer erfolgreichen Freigabe können andere Nutzer diese App deployen.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Student_App_Detail_Besitzer3.png" alt="App Store Sichtbarkeit auf Privat" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Sichtbarkeit Privat: Die App ist im Store verborgen und es können noch keine Versionen eingereicht werden.</figcaption>
-</figure>
-
-<figure style="margin-bottom: 30px;">
   <img src="img/Student_App_Detail_Besitzer4.png" alt="App Store Sichtbarkeit auf Öffentlich" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Sichtbarkeit Öffentlich: Nach dem Umstellen können die verfügbaren Versionen zur Admin-Prüfung eingereicht werden.</figcaption>
 </figure>
@@ -260,10 +241,15 @@ Willkommen im App Store! Diese Dokumentation führt dich durch die wichtigsten F
 
 ### Login und Dashboard
 
-Der Einstieg in die Plattform erfolgt über den regulären Login. Du kannst dich entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
+Der Einstieg in die Plattform erfolgt über den regulären Login. Klicke auf der Startseite auf **Mit DHBW anmelden**. Du wirst anschließend zur Keycloak-Anmeldung weitergeleitet und kannst dich dort entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Login.png" alt="Login" width="80%">
+  <img src="img/Login.png" alt="Startseite" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Startseite: Anmeldung über „Mit DHBW anmelden“</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/Login_Keycloak.png" alt="Login" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Keycloak Login</figcaption>
 </figure>
 
@@ -279,7 +265,7 @@ Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst
 **Erstanmeldung:** Wenn du dich zum ersten Mal anmeldest, fehlen dem System noch deine OpenStack-Zugangsdaten. Dies wird dir direkt oben auf dem Dashboard durch einen gelb hinterlegten Hinweis ("OpenStack-Credentials fehlen") signalisiert. Klicke dort auf den Button **Jetzt einrichten**, um deine Daten zu hinterlegen.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Fehlende_Credentials.png" alt="Dashboard mit fehlenden Credentials" width="80%">
+  <img src="img/Hinweis_auf_fehlende_OpenStack-Credentials.png" alt="Dashboard mit fehlenden Credentials" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Dashboard: Hinweis auf fehlende OpenStack-Credentials</figcaption>
 </figure>
 
@@ -288,7 +274,7 @@ Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst
 ### OpenStack-Credentials hinterlegen
 
 Um die Ressourcen der Plattform nutzen zu können, müssen deine Credentials gültig sein. Auf der Einrichtungsseite hast du zwei Möglichkeiten:
-1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region, Username etc.) händisch in die entsprechenden Felder ein.
+1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region etc.) händisch in die entsprechenden Felder ein. Über die Reiter wählst du dabei zwischen **Application Credential** (empfohlen) und **Username & Passwort**.
 2. **Datei-Upload (Empfohlen):** Ziehe einfach deine `clouds.yaml`-Datei per Drag & Drop in das gestrichelte Feld oder klicke auf "Datei auswählen". Die Felder werden daraufhin automatisch ausgefüllt. Du musst lediglich noch dein persönliches Passwort eingeben.
 
 Sobald die Daten gespeichert sind, prüft das System diese. Oben links erscheint ein grüner Status **"Credentials gültig"**. Du kannst die Verbindung jederzeit über den Button **Erneut testen** aktualisieren oder die Daten über **Löschen** komplett entfernen.
@@ -296,8 +282,8 @@ Sobald die Daten gespeichert sind, prüft das System diese. Oben links erscheint
 > **Ausnahmefall:** Solltest du aus der Vergangenheit bereits zugewiesene Deployments besitzen, aber keine gültigen Credentials mehr hinterlegt haben, musst du zunächst alle aktuellen Deployments löschen, bevor du neue Credentials hinzufügen kannst. In diesem (seltenen) Fall erscheint ein blauer Hinweiskasten mit weiteren Instruktionen.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Credentials_hochladen.png" alt="OpenStack Credentials einrichten" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Profil-Einstellungen: Credentials hochladen oder manuell eintragen</figcaption>
+  <img src="img/Credentials_hochladen_admin.png" alt="OpenStack Credentials einrichten" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Profil-Einstellungen: Gültige Credentials, gesperrt solange eigene Deployments aktiv sind</figcaption>
 </figure>
 
 ---
@@ -335,7 +321,7 @@ Zusätzlich findest du hier unter dem Punkt "Einstellungen" jederzeit den Link z
 8. Klicke abschließend auf **Hinzufügen**. Die App taucht nun in der Übersicht auf und wartet (sofern sie öffentlich ist) auf die Freigabe durch einen Administrator.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/App_hinzufuegen.png" alt="App hinzufügen" width="80%">
+  <img src="img/App_hinzufuegen_admin.png" alt="App hinzufügen" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">App hinzufügen: Einreichen einer neuen App für den Store</figcaption>
 </figure>
 
@@ -471,11 +457,11 @@ In der Kursverwaltung siehst du alle auf der Plattform angelegten Kurse. Bearbei
 
 > **Hinweis (Deployment erstellen):** Um ein Deployment zu erstellen, muss im Vorfeld bereits eine App angelegt und freigegeben worden sein.
 
-1. Klicke in der Deployment-Übersicht oben rechts auf den Button **+ Neues Deployment**. 
+1. Klicke in der Deployment-Übersicht oben rechts auf den Button **Neues Deployment**. 
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Deployment_erstellen.png" alt="Deployment erstellen" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployment erstellen</figcaption>
+  <img src="img/Alle_Deployments_admin.png" alt="Deployment erstellen" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht mit dem Button „Neues Deployment“</figcaption>
 </figure>
 
 2. Wähle eine der bereits angelegten Apps aus, indem du auf **Details & Deployment** klickst. Auf der nun geöffneten App-Detail-Seite wählst du rechts die gewünschte Version aus und klickst auf **Jetzt Deployen**. 
@@ -542,6 +528,41 @@ In der Kursverwaltung siehst du alle auf der Plattform angelegten Kurse. Bearbei
   <figcaption style="font-size: 0.9em; color: #555;">Übersicht: Zusammenfassung der Basis-Konfigurationen, Team-Zuteilung und Varianlen-Konfiguration</figcaption>
 </figure>
 
+### Schnell-Deploy
+
+> **Hinweis:** Der Schnell-Deploy befindet sich aktuell noch in Entwicklung (Zwischenstand). Ablauf und Oberfläche können sich noch ändern.
+
+Mit dem Schnell-Deploy startest du eine App ohne den kompletten Assistenten zu durchlaufen. Name, Version (in der Regel die neueste) und Variablen (Standardwerte des App-Erstellers) werden automatisch vorbefüllt. Du entscheidest nur noch, wer die Umgebung bekommt.
+
+1. Klicke in der App-Übersicht auf der Kachel der gewünschten App auf **Schnell-Deploy**. Alternativ findest du den Button auch auf der App-Detailseite rechts unter der Versionsauswahl.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Button.png" alt="Schnell-Deploy Button" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">App-Übersicht: Schnell-Deploy direkt auf der App-Kachel</figcaption>
+</figure>
+
+2. Wähle im Dialog unter **Kurs** entweder **Nur ich** (eigene Umgebung, z. B. zum Ausprobieren der App) oder einen Kurs aus. Bei einem Kurs werden alle Teilnehmer vorausgewählt und können einzeln ab- bzw. angewählt werden. Klicke anschließend auf **Weiter zur Übersicht**.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Dialog.png" alt="Schnell-Deploy Dialog" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Standardauswahl „Nur ich“</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Teilnehmer.png" alt="Schnell-Deploy Teilnehmer" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Kurs und Teilnehmer auswählen</figcaption>
+</figure>
+
+3. Du landest direkt auf der Übersichts-Seite des Deployment-Prozesses. Alle ausgewählten Teilnehmer befinden sich in einem gemeinsamen Team. Prüfe die vorbefüllten Werte und passe sie bei Bedarf über **Bearbeiten** an. Mit **Deployen** startest du das Deployment.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Uebersicht.png" alt="Schnell-Deploy Übersicht" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Vorbefüllte Übersicht vor dem Deployen</figcaption>
+</figure>
+
+* **Voraussetzungen:** Es müssen gültige OpenStack-Credentials hinterlegt sein und die App muss mindestens eine deploybare Version besitzen.
+* **Pflichteingaben ohne Standardwert:** Benötigt eine App Eingaben, für die es keinen verwendbaren Standardwert gibt (z. B. Datei-Uploads), öffnet sich stattdessen der reguläre Assistent – bereits vorausgefüllt.
+
 ---
 
 ### Deployments und Zugangsdaten einsehen
@@ -564,8 +585,13 @@ Die Detailansicht bietet dir grundlegende Informationen zum gewählten Deploymen
 * **Teams & Mitglieder:** Listet alle beteiligten Teams sowie die zugewiesenen Studierenden auf. Hier kannst du Studierenden die Zugangsdaten hier bei Bedarf erneut zusenden (**Zugang erneut senden**), sowie ihre Zugangsdaten einsehen und separat kopieren.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Depl_detail3.png" alt="Deployment Übersicht" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployments Übersicht</figcaption>
+  <img src="img/Depl_detail_admin.png" alt="Deployment Übersicht" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Allgemeine Details</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/Depl_detail3.png" alt="Teams & Mitglieder" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Teams & Mitglieder mit Zugangsdaten</figcaption>
 </figure>
 
 #### Infrastruktur
@@ -591,27 +617,17 @@ Hier erhältst du transparente Einblicke in den technischen Ablauf und den aktue
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Depl_logs.png" alt="Deployment Übersicht Tasks & Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployments Übersicht Tasks & Logs</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Tasks & Logs: Details und Logs eines Tasks</figcaption>
 </figure>
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Depl_logs2.png" alt="Deployment Übersicht Terraform Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployments Übersicht Terraform Logs</figcaption>
+  <img src="img/Depl_logs2.png" alt="VM-Details" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Infrastruktur: VM-Details einer Instanz</figcaption>
 </figure>
 
 #### Echtzeit-Logs
 
 Während des eines Deployments kannst du in der Deployment Detailseite mit Echtzeit-Logs den Status überprüfen. Du kannst hier verfolgen in welchem Schritt das Deployment gerade ist und in den Logs diese nachvollziehen.
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/live_logs.png" alt="Echtzeit-Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Echtzeit-Logs</figcaption>
-</figure>
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/live_logs2.png" alt="Echtzeit-Logs Details" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Echtzeit-Logs Details</figcaption>
-</figure>
 
 ---
 
@@ -625,7 +641,7 @@ Diese Seite dient als zentrale Anlaufstelle für Fragen und Probleme:
 * **Nützliche Links:** Hier findest du Verlinkungen zum Projekt-Repository auf GitHub, zur technischen Dokumentation für Installation/Administration sowie Details zur Technologie-Architektur.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Hilfeseite.png" alt="Hilfe Seite" width="80%">
+  <img src="img/Hilfeseite_admin.png" alt="Hilfe Seite" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Hilfe & Q/A: Support, Anleitungen und weiterführende Links</figcaption>
 </figure>
 
@@ -640,10 +656,15 @@ Willkommen im App Store! Diese Dokumentation führt dich durch die wichtigsten F
 
 ### Login und Dashboard
 
-Der Einstieg in die Plattform erfolgt über den regulären Login. Du kannst dich entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
+Der Einstieg in die Plattform erfolgt über den regulären Login. Klicke auf der Startseite auf **Mit DHBW anmelden**. Du wirst anschließend zur Keycloak-Anmeldung weitergeleitet und kannst dich dort entweder mit deinem **Benutzernamen und Passwort** oder deiner **E-Mail-Adresse und Passwort** anmelden.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Login.png" alt="Login" width="80%">
+  <img src="img/Login.png" alt="Startseite" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Startseite: Anmeldung über „Mit DHBW anmelden“</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/Login_Keycloak.png" alt="Login" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Keycloak Login</figcaption>
 </figure>
 
@@ -652,14 +673,14 @@ Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst
 * Deine verfügbaren und genutzten OpenStack-Ressourcen (z. B. VMs, RAM, Storage, Floating IPs).
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Dashboard_admin.png" alt="Login" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Keycloak Login</figcaption>
+  <img src="img/Lehrender_Dashboard.png" alt="Dashboard mit Ressourcenverbrauch" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Dashboard mit Ressourcenverbrauch</figcaption>
 </figure>
 
 **Erstanmeldung:** Wenn du dich zum ersten Mal anmeldest, fehlen dem System noch deine OpenStack-Zugangsdaten. Dies wird dir direkt oben auf dem Dashboard durch einen gelb hinterlegten Hinweis ("OpenStack-Credentials fehlen") signalisiert. Klicke dort auf den Button **Jetzt einrichten**, um deine Daten zu hinterlegen.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Hinweis_auf_fehlende_OS-Creds_admin.png" alt="Dashboard mit fehlenden Credentials" width="80%">
+  <img src="img/Hinweis_auf_fehlende_OpenStack-Credentials.png" alt="Dashboard mit fehlenden Credentials" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Dashboard: Hinweis auf fehlende OpenStack-Credentials</figcaption>
 </figure>
 
@@ -668,7 +689,7 @@ Nach erfolgreichem Login landest du direkt auf dem **Dashboard**. Hier erhältst
 ### OpenStack-Credentials hinterlegen
 
 Um die Ressourcen der Plattform nutzen zu können, müssen deine Credentials gültig sein. Auf der Einrichtungsseite hast du zwei Möglichkeiten:
-1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region, Username etc.) händisch in die entsprechenden Felder ein.
+1. **Manuelle Eingabe:** Trage die Daten (Auth-URL, Region etc.) händisch in die entsprechenden Felder ein. Über die Reiter wählst du dabei zwischen **Application Credential** (empfohlen) und **Username & Passwort**.
 2. **Datei-Upload (Empfohlen):** Ziehe einfach deine `clouds.yaml`-Datei per Drag & Drop in das gestrichelte Feld oder klicke auf "Datei auswählen". Die Felder werden daraufhin automatisch ausgefüllt. Du musst lediglich noch dein persönliches Passwort eingeben.
 
 Sobald die Daten gespeichert sind, prüft das System diese. Oben links erscheint ein grüner Status **"Credentials gültig"**. Du kannst die Verbindung jederzeit über den Button **Erneut testen** aktualisieren oder die Daten über **Löschen** komplett entfernen.
@@ -677,7 +698,7 @@ Sobald die Daten gespeichert sind, prüft das System diese. Oben links erscheint
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Credentials_hochladen_admin.png" alt="OpenStack Credentials einrichten" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Profil-Einstellungen: Credentials hochladen oder manuell eintragen</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Profil-Einstellungen: Gültige Credentials, gesperrt solange eigene Deployments aktiv sind</figcaption>
 </figure>
 
 ---
@@ -695,7 +716,7 @@ In der Profilansicht siehst du alle relevanten Account-Daten auf einen Blick:
 Zusätzlich findest du hier unter dem Punkt "Einstellungen" jederzeit den Link zu deinen **OpenStack-Credentials**, falls du diese nachträglich anpassen musst. Über den "Zurück"-Button oben links gelangst du wieder auf das Dashboard.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Overview_Nutzerdaten_admin.png" alt="Profilansicht" width="80%">
+  <img src="img/Profil.png" alt="Profilansicht" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Profil: Übersicht der eigenen Benutzerdaten</figcaption>
 </figure>
 
@@ -720,7 +741,7 @@ Zusätzlich findest du hier unter dem Punkt "Einstellungen" jederzeit den Link z
 Klicke abschließend auf **Hinzufügen**. Die App wird angelegt und befindet sich nun im Status „Wartet auf Freigabe“. Als Admin kannst du die App im nächsten Schritt direkt selbst (oder durch einen anderen Admin) prüfen und genehmigen.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/App_hinzufuegen.png" alt="App hinzufügen" width="80%">
+  <img src="img/App_hinzufuegen_admin.png" alt="App hinzufügen" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">App hinzufügen: Einreichen einer neuen App für den Store</figcaption>
 </figure>
 
@@ -787,7 +808,7 @@ Auf der rechten Seite befindet sich eine fixierte Box zur Versionssteuerung und 
 * **App deployen:** Anders als reguläre Nutzer (z. B. Studenten) hast du als Admin die Berechtigung, den Deployment-Prozess zu starten. Wähle dazu einfach die gewünschte Version aus und klicke auf den Button **Jetzt Deployen**.
 
  <figure style="margin-bottom: 30px;">
-  <img src="img/App_Details_1_admin.png" alt="App hinzufügen" width="80%">
+  <img src="img/app_übersicht.png" alt="App hinzufügen" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">App-Details - Tab: Übersicht</figcaption>
 </figure>
 
@@ -808,7 +829,7 @@ In diesem Tab verwaltest du die Sichtbarkeit der App im Store sowie deren Freiga
   * **App eines anderen Nutzers:** Ist nach der Umstellung nur noch für dich (als Admin) und den ursprünglichen Ersteller sichtbar.
 
   <figure style="margin-bottom: 30px;">
-  <img src="img/App_Details_2_admin.png" alt="App hinzufügen" width="80%">
+  <img src="img/App_Appstore.png" alt="App hinzufügen" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">App-Details - Tab: App Store</figcaption>
 </figure>
 
@@ -868,12 +889,7 @@ Die Deployments werden als Kacheln angezeigt.
 
 > **Hinweis (Deployment erstellen):** Um ein Deployment zu erstellen, muss im Vorfeld bereits eine App angelegt und freigegeben worden sein.
 
-1. Klicke in der Deployment-Übersicht oben rechts auf den Button **+ Neues Deployment**. 
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/Deployment_erstellen.png" alt="Deployment erstellen" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployment erstellen</figcaption>
-</figure>
+1. Klicke in der Deployment-Übersicht oben rechts auf den Button **Neues Deployment**. 
 
 2. Wähle eine der bereits angelegten Apps aus, indem du auf **Details & Deployment** klickst. Auf der nun geöffneten App-Detail-Seite wählst du rechts die gewünschte Version aus und klickst auf **Jetzt Deployen**. 
 
@@ -940,6 +956,41 @@ Die Deployments werden als Kacheln angezeigt.
   <figcaption style="font-size: 0.9em; color: #555;">Dropdown und Dateiupload</figcaption>
 </figure>
 
+### Schnell-Deploy
+
+> **Hinweis:** Der Schnell-Deploy befindet sich aktuell noch in Entwicklung (Zwischenstand). Ablauf und Oberfläche können sich noch ändern.
+
+Mit dem Schnell-Deploy startest du eine App ohne den kompletten Assistenten zu durchlaufen. Name, Version (in der Regel die neueste) und Variablen (Standardwerte des App-Erstellers) werden automatisch vorbefüllt. Du entscheidest nur noch, wer die Umgebung bekommt.
+
+1. Klicke in der App-Übersicht auf der Kachel der gewünschten App auf **Schnell-Deploy**. Alternativ findest du den Button auch auf der App-Detailseite rechts unter der Versionsauswahl.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Button.png" alt="Schnell-Deploy Button" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">App-Übersicht: Schnell-Deploy direkt auf der App-Kachel</figcaption>
+</figure>
+
+2. Wähle im Dialog unter **Kurs** entweder **Nur ich** (eigene Umgebung, z. B. zum Ausprobieren der App) oder einen Kurs aus. Bei einem Kurs werden alle Teilnehmer vorausgewählt und können einzeln ab- bzw. angewählt werden. Klicke anschließend auf **Weiter zur Übersicht**.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Dialog.png" alt="Schnell-Deploy Dialog" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Standardauswahl „Nur ich“</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Teilnehmer.png" alt="Schnell-Deploy Teilnehmer" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Kurs und Teilnehmer auswählen</figcaption>
+</figure>
+
+3. Du landest direkt auf der Übersichts-Seite des Deployment-Prozesses. Alle ausgewählten Teilnehmer befinden sich in einem gemeinsamen Team. Prüfe die vorbefüllten Werte und passe sie bei Bedarf über **Bearbeiten** an. Mit **Deployen** startest du das Deployment.
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/QuickDeploy_Uebersicht.png" alt="Schnell-Deploy Übersicht" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Schnell-Deploy: Vorbefüllte Übersicht vor dem Deployen</figcaption>
+</figure>
+
+* **Voraussetzungen:** Es müssen gültige OpenStack-Credentials hinterlegt sein und die App muss mindestens eine deploybare Version besitzen.
+* **Pflichteingaben ohne Standardwert:** Benötigt eine App Eingaben, für die es keinen verwendbaren Standardwert gibt (z. B. Datei-Uploads), öffnet sich stattdessen der reguläre Assistent – bereits vorausgefüllt.
+
 ---
 
 ### Deployments und Zugangsdaten einsehen
@@ -965,7 +1016,12 @@ Die Detailansicht bietet dir grundlegende Informationen zum gewählten Deploymen
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Depl_detail_admin.png" alt="Deployment Übersicht" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Allgemeine Details und Teaminformationen</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Allgemeine Details</figcaption>
+</figure>
+
+<figure style="margin-bottom: 30px;">
+  <img src="img/Depl_detail3.png" alt="Teams & Mitglieder" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Teams & Mitglieder mit Zugangsdaten</figcaption>
 </figure>
 
 ---
@@ -995,27 +1051,17 @@ Hier erhältst du transparente Einblicke in den technischen Ablauf und den aktue
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Depl_logs.png" alt="Deployment Übersicht Tasks & Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Tasks und Live-Logs</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Tasks & Logs: Details und Logs eines Tasks</figcaption>
 </figure>
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Depl_logs2.png" alt="Deployment Übersicht Terraform Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Deployment-Übersicht: Terraform State (JSON)</figcaption>
+  <img src="img/Depl_logs2.png" alt="VM-Details" width="80%">
+  <figcaption style="font-size: 0.9em; color: #555;">Infrastruktur: VM-Details einer Instanz</figcaption>
 </figure>
 
 #### Echtzeit-Logs
 
 Während des eines Deployments kannst du in der Deployment Detailseite mit Echtzeit-Logs den Status überprüfen. Du kannst hier verfolgen in welchem Schritt das Deployment gerade ist und in den Logs diese nachvollziehen.
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/live_logs.png" alt="Echtzeit-Logs" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Echtzeit-Logs</figcaption>
-</figure>
-
-<figure style="margin-bottom: 30px;">
-  <img src="img/live_logs2.png" alt="Echtzeit-Logs Details" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Echtzeit-Logs Details</figcaption>
-</figure>
 
 ### App-Freigaben verwalten
 
@@ -1023,16 +1069,16 @@ Als Admin verfügst du über erweiterte Rechte, um neue App-Versionen zu prüfen
 
 ### Die Freigabe-Verwaltung im Überblick
 
-Über den Menüpunkt **Apps** in der linken Seitenleiste gelangst du zur Freigabe-Verwaltung. Hier siehst du standardmäßig nur Apps, für die aktuell eine Freigabe beantragt wurde. 
+Über den Menüpunkt **Freigaben** in der linken Seitenleiste gelangst du zur Freigabe-Verwaltung. Hier siehst du standardmäßig (Filter **Nur mit Einreichungen**) nur Apps, für die aktuell eine Freigabe beantragt wurde. 
 
 * **Neue Versionen prüfen:** Liegen ausstehende Einreichungen vor, werden diese hier aufgelistet. Du kannst jede Version entweder **genehmigen** oder **ablehnen**.
-* **Filter ausschalten (Alle Apps anzeigen):** Wenn du oben rechts den Filter deaktivierst, siehst du alle öffentlichen und privaten Apps. 
+* **Filter ausschalten (Alle Apps anzeigen):** Wenn du oben rechts den Filter deaktivierst (oder auf **Alle Apps anzeigen** klickst), siehst du alle öffentlichen und privaten Apps. 
 * **Hinweis zu privaten Apps:** Hier werden keine ausstehenden Freigaben angezeigt. Erst wenn eine App veröffentlicht wird, können Versionen zur Freigabe eingereicht werden.
-* **Detailansicht:** Klicke auf eine App in der Liste, um alle eingereichten Versionen und deren aktuellen Status einzusehen.
+* **Detailansicht:** Klicke auf eine App in der Liste, um sie aufzuklappen und alle eingereichten Versionen und deren aktuellen Status einzusehen.
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Genehmigen_Ablehnen.png" alt="Freigabe-Verwaltungsseite" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Freigabe-Verwaltung: Übersicht der ausstehenden App-Freigaben</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Freigabe-Verwaltung: Standardansicht (hier ohne offene Einreichungen)</figcaption>
 </figure>
 
 
@@ -1055,7 +1101,7 @@ Du hast drei Möglichkeiten, wie du mit eingereichten oder bereits freigegebenen
 
 <figure style="margin-bottom: 30px;">
   <img src="img/Freigabe_widerrufen.png" alt="Freigabe-Verwaltungsseite: Freigabe widerrufen" width="80%">
-  <figcaption style="font-size: 0.9em; color: #555;">Freigabe-Verwaltung: Freigabe widerrufen</figcaption>
+  <figcaption style="font-size: 0.9em; color: #555;">Freigabe-Verwaltung: Aufgeklappte App mit dem Button „Widerrufen“</figcaption>
 </figure>
 
 
@@ -1071,7 +1117,7 @@ Diese Seite dient als zentrale Anlaufstelle für Fragen und Probleme:
 * **Nützliche Links:** Hier findest du Verlinkungen zum Projekt-Repository auf GitHub, zur technischen Dokumentation für Installation/Administration sowie Details zur Technologie-Architektur.
 
 <figure style="margin-bottom: 30px;">
-  <img src="img/Hilfeseite.png" alt="Hilfe Seite" width="80%">
+  <img src="img/Hilfeseite_admin.png" alt="Hilfe Seite" width="80%">
   <figcaption style="font-size: 0.9em; color: #555;">Hilfe & Q/A: Support, Anleitungen und weiterführende Links</figcaption>
 </figure>
 
