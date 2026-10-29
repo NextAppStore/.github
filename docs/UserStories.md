@@ -17,6 +17,7 @@
 | [BWL-3](#bwl-3) | BWL Dozent | Empfehlungen und Hilfe bei der Konfiguration |
 | [BWL-4](#bwl-4) | BWL Dozent | Übungsdatensätze zentral ablegen |
 | [BWL-5](#bwl-5) | BWL Dozent | Bedienung ohne technische Vorkenntnisse |
+| [BWL-6](#bwl-6) | BWL Dozent | Integration in Moodle |
 | [ADMIN-1](#admin-1) | Administrator | Integration in den Self-Service |
 
 ---
@@ -320,6 +321,27 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 |:-:|---|
 | 1 | Das Bereitstellen von virtuellen Maschinen soll auf dem "Golden Path" keine technischen Auswahlmöglichkeiten beinhalten, bspw. Security-Groups oder Netzwerke.  |
 | 2 | Technische Begriffe auf der Seite eines Deployments standardmäßig verstecken oder umbennen, wie Git-Repository oder Image-ID. |
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
+
+<a id="bwl-6"></a>
+
+### BWL-6 - Integration in Moodle
+
+| | |
+|---|---|
+| **Als** | BWL Dozent |
+| **möchte ich** | ScholarStack direkt aus Moodle aufrufen können, |
+| **damit** | ich alle meine Inhalte zur Vorlesung an einem Ort finde. |
+
+**Akzeptanzkriterien**
+
+| # | Kriterium |
+|:-:|---|
+| 1 | ScholarStack erhält Accountdaten über Moodle.  |
+| 2 | In Moodle wird eine Nutzeroberfläche von ScholarStack angezeigt. |
 
 | I | N | V | E | S | T |
 |:-:|:-:|:-:|:-:|:-:|:-:|
