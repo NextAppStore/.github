@@ -1,18 +1,28 @@
 // ER-Diagramm basierend auf aktueller Datenbankstruktur
-
-Table users {
-  userId uuid [primary key]
-  email varchar [not null]
-  username varchar [not null]
-  role varchar [not null, note: 'USER-DEFINED type']
-  courseId uuid [ref: > courses.courseId]
-  created_at timestamp
-  keycloak_id varchar
-}
+// Quelle: backend/app/models.py (worker/app/job_tables.py bildet nur tasks/task_events ab)
 
 Table courses {
   courseId uuid [primary key]
   name varchar [not null]
+  lti_context_id varchar [unique, note: 'Moodle LTI context id']
+}
+
+Table users {
+  userId uuid [primary key]
+  keycloak_id varchar [unique]
+  lti_iss varchar [note: 'LTI 1.3 issuer']
+  lti_sub varchar [note: 'LTI 1.3 subject']
+  email varchar [not null, unique]
+  username varchar [not null]
+  firstName varchar
+  lastName varchar
+  role varchar [not null, default: 'student', note: 'enum: student, teacher, admin']
+  courseId uuid [ref: > courses.courseId]
+  created_at timestamp
+
+  indexes {
+    (lti_iss, lti_sub) [unique, name: 'uq_users_lti_identity']
+  }
 }
 
 Table apps {
@@ -20,45 +30,141 @@ Table apps {
   name varchar [not null]
   description varchar
   image bytea
+  image_mime varchar
   git_link varchar
+  is_private boolean [not null, default: false]
   userId uuid [not null, ref: > users.userId]
+  vm_topology varchar [note: 'enum: shared, per_team, per_user, custom']
+  requirements text
+  recommended_for text
   created_at timestamp
+  deleted_at timestamp [note: 'soft delete']
 }
 
 Table deployments {
   deploymentId uuid [primary key]
   name varchar [not null]
+  releaseTag varchar
   userInputVar text
   userId uuid [not null, ref: > users.userId]
   appId uuid [not null, ref: > apps.appId]
-  releaseTag varchar
+  deleted_at timestamp [note: 'soft delete']
 }
 
 Table tasks {
   taskId uuid [primary key]
-  deploymentId uuid [not null, ref: > deployments.deploymentId]
-  celeryTaskId varchar [not null]
-  type varchar [not null, note: 'USER-DEFINED type']
-  status varchar [note: 'USER-DEFINED type']
+  deploymentId uuid [not null, ref: > deployments.deploymentId, note: 'ON DELETE CASCADE']
+  type varchar [not null, note: 'enum: deploy, update, destroy, pause, resume, redeploy, lab_reassign, lab_reset, lab_add_student, lab_remove_student']
+  status varchar [default: 'pending', note: 'enum: pending, running, success, failed, cancelled']
   started_at timestamp
   finished_at timestamp
   logs text
-  tf_state text
   outputs text
+  current_phase varchar
+  progress_pct integer
+  locale varchar [not null, default: 'de']
   created_at timestamp
+  payload bytea [note: 'Fernet-encrypted job payload']
+  state_token_hash varchar
+  claimed_by varchar
+  lease_until timestamp
+  finalized_at timestamp
+
+  indexes {
+    deploymentId [unique, name: 'uq_tasks_active_per_deployment', note: 'partial unique WHERE status IN (pending, running)']
+    created_at [name: 'ix_tasks_pending', note: 'partial WHERE status = pending']
+    finished_at [name: 'ix_tasks_unfinalized', note: 'partial WHERE finalized_at IS NULL']
+    lease_until [name: 'ix_tasks_running_lease', note: 'partial WHERE status = running']
+  }
+}
+
+Table task_events {
+  id bigint [primary key, increment]
+  taskId uuid [not null, ref: > tasks.taskId, note: 'ON DELETE CASCADE']
+  type varchar [not null, note: 'e.g. task-progress, task-log, task-succeeded, task-failed']
+  payload text [not null, note: 'JSON payload sent to browser']
+  created_at timestamp [not null]
+}
+
+Table terraform_states {
+  deploymentId uuid [primary key, ref: > deployments.deploymentId, note: 'ON DELETE CASCADE; 1:1 with deployments']
+  state bytea [note: 'Fernet-encrypted JSON OpenTofu state']
+  lock_id varchar
+  lock_info text
+  lock_task_id uuid
+  updated_at timestamp
+}
+
+Table lti_login_states {
+  state varchar [primary key]
+  nonce varchar [not null]
+  expires_at timestamp [not null]
+}
+
+Table user_openstack_credentials {
+  credentialId uuid [primary key]
+  userId uuid [not null, unique, ref: > users.userId, note: 'ON DELETE CASCADE; 1:1 with users']
+  auth_type varchar [not null, note: 'enum: v3applicationcredential, password']
+  auth_url varchar [not null]
+  region_name varchar
+  interface varchar [default: 'public']
+  identity_api_version varchar [default: '3']
+  project_id varchar
+  project_name varchar
+  user_domain_name varchar
+  project_domain_name varchar
+  encrypted_identifier bytea [not null]
+  encrypted_secret bytea [not null]
+  last_validated_at timestamp
+  last_validation_error text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table app_version_approvals {
+  approvalId uuid [primary key]
+  appId uuid [not null, ref: > apps.appId, note: 'ON DELETE CASCADE']
+  version_tag varchar [not null]
+  status varchar [not null, default: 'pending', note: 'enum: pending, approved, rejected']
+  diff_url varchar
+  notes text
+  rejection_reason text
+  reviewed_by uuid [ref: > users.userId, note: 'ON DELETE SET NULL']
+  reviewed_at timestamp
+  created_at timestamp [not null]
+
+  indexes {
+    (appId, version_tag) [unique, name: 'uq_app_version_approval']
+  }
+}
+
+Table course_teachers {
+  course_id uuid [not null, ref: > courses.courseId, note: 'ON DELETE CASCADE']
+  user_id uuid [not null, ref: > users.userId, note: 'ON DELETE CASCADE']
+
+  indexes {
+    (course_id, user_id) [pk]
+  }
+}
+
+Table settings {
+  key varchar [primary key]
+  value text [note: 'JSON-encoded']
+  updated_at timestamp
+  updated_by uuid [ref: > users.userId, note: 'ON DELETE SET NULL']
 }
 
 Table teams {
   teamId uuid [primary key]
   name varchar [not null]
-  deploymentId uuid [not null, ref: > deployments.deploymentId]
+  deploymentId uuid [not null, ref: > deployments.deploymentId, note: 'ON DELETE CASCADE']
 }
 
 Table user_to_deployments {
   userToDeploymentId uuid [primary key]
-  userId uuid [not null, ref: > users.userId]
-  deploymentId uuid [not null, ref: > deployments.deploymentId]
-  
+  userId uuid [not null, ref: > users.userId, note: 'ON DELETE CASCADE']
+  deploymentId uuid [not null, ref: > deployments.deploymentId, note: 'ON DELETE CASCADE']
+
   indexes {
     (userId, deploymentId) [unique, note: 'Verhindert doppelte Zuweisungen']
   }
@@ -66,30 +172,44 @@ Table user_to_deployments {
 
 Table user_to_teams {
   userToTeamId uuid [primary key]
-  userId uuid [not null, ref: > users.userId]
-  teamId uuid [not null, ref: > teams.teamId]
-  
+  userId uuid [not null, ref: > users.userId, note: 'ON DELETE CASCADE']
+  teamId uuid [not null, ref: > teams.teamId, note: 'ON DELETE CASCADE']
+
   indexes {
     (userId, teamId) [unique, note: 'Verhindert doppelte Zuweisungen']
   }
 }
 
 // Kardinalitäten und Relationen:
-// 
-// users 1:n courses (many users können zu einem course gehören)
+//
+// courses 1:n users (viele users können zu einem course gehören)
+// courses n:m users (via course_teachers - Lehrende eines Kurses)
 // users 1:n apps (ein user kann viele apps erstellen)
 // users 1:n deployments (ein user kann viele deployments erstellen)
+// users 1:1 user_openstack_credentials (eigene OpenStack-Zugangsdaten je User)
 // apps 1:n deployments (eine app kann viele deployments haben)
-// deployments 1:n tasks (ein deployment kann viele tasks haben)
+// apps 1:n app_version_approvals (Freigabeprozess für App-Versionen)
+// deployments 1:n tasks (ein deployment kann viele tasks haben, max. 1 aktiver Task gleichzeitig)
+// deployments 1:1 terraform_states (verschlüsselter OpenTofu/Terraform State je deployment)
 // deployments 1:n teams (ein deployment kann viele teams haben)
+// tasks 1:n task_events (Event-Stream je Task, z. B. für Live-Logs im Frontend)
 // users n:m deployments (via user_to_deployments - zusätzliche Zugriffskontrolle)
 // users n:m teams (via user_to_teams - Teammitgliedschaften)
 //
-// Hauptunterschiede zum alten Schema:
-// - userGroup wurde entfernt
-// - courseToUserGroup wurde entfernt
-// - userToUserGroup wurde entfernt
-// - teams referenziert jetzt direkt deployments statt userGroups
-// - user_to_deployments ermöglicht n:m Beziehung zwischen users und deployments
-// - tasks Tabelle neu hinzugefügt für Celery Task-Tracking
-// - alembic_version für Datenbank-Migrationen
+// Hauptunterschiede zum vorherigen Schema (Stand 2026-10-29):
+// - Login erfolgt über Keycloak und/oder LTI 1.3 (Moodle); users.password wurde entfernt
+// - lti_login_states speichert OIDC state/nonce für den LTI-Login-Handshake
+// - courses besitzt jetzt lti_context_id zur Moodle-Kurszuordnung
+// - course_teachers bildet die n:m-Beziehung zwischen courses und users (Lehrende) ab
+// - apps unterstützt Soft-Delete (deleted_at), Sichtbarkeit (is_private), Icon-Upload (image/image_mime)
+//   sowie VM-Topologie (vm_topology), Anforderungen (requirements) und Empfehlungen (recommended_for)
+// - app_version_approvals bildet einen Freigabeworkflow für App-Versionen ab (pending/approved/rejected)
+// - deployments unterstützt Soft-Delete (deleted_at); der alte Status/Group-Mechanismus wurde entfernt
+// - tasks wurde zur Postgres-basierten Jobqueue ausgebaut: verschlüsseltes payload, Leasing
+//   (claimed_by, lease_until), Abschlussmarkierung (finalized_at), Fortschritt (current_phase,
+//   progress_pct) und Lokalisierung (locale); TaskType um redeploy und lab_* Varianten erweitert
+// - task_events protokolliert Einzel-Events (Progress/Log/Success/Failure) je Task für das Frontend
+// - terraform_states speichert den verschlüsselten OpenTofu-State je deployment (1:1)
+// - user_openstack_credentials speichert verschlüsselte OpenStack-Zugangsdaten je User (1:1)
+// - settings ist eine generische Key-Value-Konfigurationstabelle mit Änderungsnachweis (updated_by)
+// - alembic_version für Datenbank-Migrationen (nicht Teil des fachlichen Schemas)
