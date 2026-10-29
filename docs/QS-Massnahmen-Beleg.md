@@ -96,7 +96,7 @@ Als konkrete Angabe zum Ressourcenverbrauch wurde eine bereitgestellte Standard-
 
 **Empfehlung an die VM-Ersteller:** (1) Swap (1–2 GB) gegen harte OOM-Abbrüche; (2) bei Nebenläufigkeitsbedarf eine zweite vCPU; (3) Disk-Ressourcen ggf. zugunsten von RAM/CPU umschichten.
 
-### 2.2 Deploymentprozess (Kontext)
+### 2.2 Deploymentprozess 
 
 Zuverlässigkeit hängt am automatisierten Deployment-Ablauf:
 
