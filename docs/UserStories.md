@@ -19,6 +19,7 @@
 | [BWL-5](#bwl-5) | BWL Dozent | Bedienung ohne technische Vorkenntnisse |
 | [BWL-6](#bwl-6) | BWL Dozent | Integration in Moodle |
 | [ADMIN-1](#admin-1) | Administrator | Integration in den Self-Service |
+| [ADMIN-2](#admin-2) | Administrator | Automatische Erstellung von Security-Groups |
 
 ---
 
@@ -367,6 +368,27 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 |:-:|---|
 | 1 | ScholarStack unterstützt mehrere OpenStack-Projekte pro Nutzeraccount.  |
 | 2 | ScholarStack kann die Projekte des Nutzers und die Ressourcen dieser aus dem Self-Service auslesen, und diese dem Nutzer anzeigen. |
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
+
+<a id="admin-2"></a>
+
+### ADMIN-2 - Automatische Erstellung von Security-Groups
+| | |
+|---|---|
+| **Als** | Administrator |
+| **möchte ich** | automatisch passende Security-Groups zu den Apps in ScholarStack |
+| **damit** | nur die unbedingt benötigten Ports der App aus dem passenden Netz erreichbar sind. |
+
+**Akzeptanzkriterien**
+
+| # | Kriterium |
+|:-:|---|
+| 1 | Jedes App-Template gibt an, welche Ports freigegeben werden müssen. |
+| 2 | Es werden automatisch zu den Apps beim Deployment passende Security-Groups angelegt/zugeordnet. |
+| 3 | Security-Groups eines Deployment können in der Nutzeroberfläche im Nachhinein angepasst werden. |
 
 | I | N | V | E | S | T |
 |:-:|:-:|:-:|:-:|:-:|:-:|
