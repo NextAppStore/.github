@@ -1,5 +1,7 @@
 # Technologiestack
 
+*Zuletzt aktualisiert: 29.10.2026*
+
 ## 1. Frontend: Vue.js
 
 **Beschreibung:** Das Frontend wird als Single Page Application (SPA) mit Vue.js 3 realisiert. Für das State Management (die Verwaltung des globalen Anwendungszustands) kommt Pinia zum Einsatz, während Axios die Kommunikation mit dem Backend übernimmt. Das Styling erfolgt utility-first mittels Tailwind CSS.
