@@ -11,25 +11,64 @@ participant "Backend API\n[Container: FastAPI]" as Backend
 database "PostgreSQL\n[Container: Database]" as Database
 participant "Git Service\n[Backend Component]" as GitService
 participant "Git Repository\n[External System]" as Git
+participant "OpenStack\n[External System]" as OpenStack
+participant "Keycloak\n[External System]" as Keycloak
 
-== Load Available Apps ==
+note across
+  The wizard runs in four steps:
+  Config -> Variables -> Group assignment -> Summary.
+  Every request is authenticated with the same Keycloak dependency.
+end note
 
-User -> Frontend: Navigate to\n"Create Deployment" page
+== Credential check ==
+
+User -> Frontend: Navigate to\n"Create Deployment"
 activate Frontend
 
-Frontend -> Backend: GET /apps
+Frontend -> Backend: GET /me/openstack-credentials
+activate Backend
+
+Backend -> Database: get_credentials(userId)
+activate Database
+Database --> Backend: credential metadata\n(no secrets)
+deactivate Database
+
+Backend --> Frontend: OpenStackCredentialResponse
+deactivate Backend
+
+alt no credentials stored
+    Frontend --> User: CredentialMissingBanner:\nupload clouds.yaml in Settings first
+    note right
+      Deploying without a personal
+      OpenStack credential is refused
+      by POST /deployments.
+    end note
+end
+
+== Step 1: Load available apps ==
+
+Frontend -> Backend: GET /apps/
 activate Backend
 
 Backend -> Backend: get_current_user_keycloak()
 
-Backend -> Database: get_apps()
-activate Database
-note right
-  Students: only assigned apps
-  Teachers/Admins: all apps
-end note
-Database --> Backend: app list
-deactivate Database
+alt role = ADMIN
+    Backend -> Database: get_apps()
+    activate Database
+    Database --> Backend: all non-deleted apps
+    deactivate Database
+else Student / Teacher
+    Backend -> Database: get_visible_apps(userId)
+    activate Database
+    note right
+      Own apps + public apps with at
+      least one approved version.
+      Teachers get the same filter
+      as students.
+    end note
+    Database --> Backend: visible apps
+    deactivate Database
+end
 
 Backend --> Frontend: AppResponse[]
 deactivate Backend
@@ -37,7 +76,7 @@ deactivate Backend
 Frontend --> User: Display available apps
 deactivate Frontend
 
-== Select App and Load Versions ==
+== Step 1: Select app and load versions ==
 
 User -> Frontend: Select app from list
 activate Frontend
@@ -45,72 +84,86 @@ activate Frontend
 Frontend -> Backend: GET /apps/{app_id}
 activate Backend
 
-Backend -> Backend: get_current_user_keycloak()
-
-Backend -> Database: get_app()
+Backend -> Database: get_app(include_deleted=True)
 activate Database
 Database --> Backend: app object
 deactivate Database
 
-alt app has git_link
-
-Backend -> GitService: get_versions(git_link)
-activate GitService
-
-GitService -> GitService: parse_git_url(git_link)
+Backend -> Backend: can_view_app()
 note right
-  Extracts:
-  - host, owner, repo
-  - platform (github/gitlab)
+  Owner or admin sees private /
+  unapproved apps; everyone else
+  needs public AND approved -> 403
 end note
 
-alt platform is GitHub
+alt app has git_link and is not soft-deleted
 
-GitService -> Git: GET /repos/{owner}/{repo}/tags
-activate Git
-Git --> GitService: tags list
-deactivate Git
+    Backend -> GitService: get_versions(git_link)
+    activate GitService
 
-GitService -> Git: GET /repos/{owner}/{repo}/releases
-activate Git
-Git --> GitService: releases list
-deactivate Git
+    GitService -> GitService: _parse_git_url(git_link)
+    note right
+      Extracts host, owner, repo
+      and the platform
+      (github / gitlab)
+    end note
 
-else platform is GitLab
+    alt platform is GitHub
+        GitService -> Git: GET /repos/{owner}/{repo}/tags
+        activate Git
+        Git --> GitService: tags list
+        deactivate Git
 
-GitService -> Git: GET /api/v4/projects/{project}/repository/tags
-activate Git
-Git --> GitService: tags list
-deactivate Git
+        GitService -> Git: GET /repos/{owner}/{repo}/releases
+        activate Git
+        Git --> GitService: releases list
+        deactivate Git
+    else platform is GitLab
+        GitService -> Git: GET /api/v4/projects/{project}/repository/tags
+        activate Git
+        Git --> GitService: tags list
+        deactivate Git
 
-GitService -> Git: GET /api/v4/projects/{project}/releases
-activate Git
-Git --> GitService: releases list
-deactivate Git
+        GitService -> Git: GET /api/v4/projects/{project}/releases
+        activate Git
+        Git --> GitService: releases list
+        deactivate Git
+    end
 
+    GitService -> GitService: merge tags and releases
+    note right
+      Combines
+      - tags: {version, commit, type}
+      - releases: {name, description,
+        author, published_at,
+        prerelease, html_url}
+      into unified versions[]
+    end note
+
+    GitService --> Backend: versions[]
+    deactivate GitService
+
+    alt caller is owner or admin
+        Backend -> Backend: app.versions = all versions
+    else everyone else
+        Backend -> Database: get_approvals_for_app(appId)
+        activate Database
+        Database --> Backend: approvals
+        deactivate Database
+        Backend -> Backend: keep only tags whose\napproval status = "approved"
+    end
+
+else no git_link or soft-deleted
+    Backend -> Backend: app.versions = []
 end
-
-GitService -> GitService: merge tags and releases
-note right
-  Combines
-  - tags: {version, commit, type}
-  - releases: {name, description,
-    author, published_at, prerelease, htmlurl}
-  into unified versions[]
-end note
-
-GitService --> Backend: versions[]
-deactivate GitService
-
-Backend -> Backend: app.versions = versions[]
 
 Backend --> Frontend: AppWithVersions
 deactivate Backend
 
-Frontend --> User: Display app with\navailable versions
+Frontend --> User: Display app with\nselectable versions
 deactivate Frontend
 
-== Select Version and Load Variables ==
+== Step 2: Select version and load variables ==
 
 User -> Frontend: Select version
 activate Frontend
@@ -118,26 +171,24 @@ activate Frontend
 Frontend -> Backend: GET /apps/{app_id}/variables\n?version={version}
 activate Backend
 
-Backend -> Backend: get_current_user_keycloak()
-
 Backend -> Database: get_app()
 activate Database
 Database --> Backend: app object
 deactivate Database
 
-Backend -> GitService: clone_release_vars()
+Backend -> Backend: ensure_view_app()
+
+Backend -> GitService: clone_release_vars(\ngit_link, version, "vars_{app_id}_{version}")
 activate GitService
 
-GitService -> GitService: create temp directory
-'\ndeployment_id =\n"vars_{app_id}_{version}"
-
-GitService -> Git: git pull 
-' --filter=blob:none\n--sparse {git_url}
+GitService -> Git: git clone --filter=blob:none --sparse
 activate Git
 note right
-  with sparse checkout:
+  Sparse checkout allowlist:
   - terraform/variables.tf
-  - packer/variables.pkr.hcl
+  - packer/ (whole subtree, so both
+    the flat layout and the
+    per-template layout are fetched)
 end note
 Git --> GitService: repo_path (local)
 deactivate Git
@@ -145,52 +196,177 @@ deactivate Git
 GitService --> Backend: repo_path
 deactivate GitService
 
-Backend -> Backend: parse_terraform_variables()
+Backend -> Backend: _parse_terraform_variables(\nterraform/variables.tf)
+
+Backend -> Backend: _discover_packer_templates(repo_path)
 note right
-  Extracts for each variable:
-  - name
-  - type (string, number, etc.)
-  - description
-  - default value
-  - required (bool)
-  - openstack_type (network,
-    flavor, security_group, etc.)
-  - source: "terraform"
+  Flat (packer/variables.pkr.hcl) or
+  per-key subdirectories
+  (packer/<key>/...). An ambiguous or
+  unsafe layout raises -> HTTP 422
 end note
 
-Backend -> Backend: parse_packer_variables()
-note right
-  Same extraction as Terraform
-  - source: "packer"
+loop for each Packer template
+    Backend -> Backend: _parse_packer_variables(\ntemplate_key)
+end
+
+note right of Backend
+  Per variable:
+  - name, type, description
+  - default, required
+  - source: "terraform" | "packer"
+  - templateKey (image grouping)
+  - varScope: team | user (from
+    @scope marker)
+  - openstack_type + mode/multi
+    (from @openstack markers:
+    network, flavor, image,
+    keypair, security_group,
+    volume, router, ...)
+  - fileExtensions (@file marker)
+  - markerError (bad marker,
+    reported inline per variable)
 end note
 
-Backend -> Backend: cleanup_repository()
+Backend -> Backend: cleanup_repository(repo_path)
 
-Backend --> Frontend: variables[]
+Backend --> Frontend: AppVariableResponse[]
 deactivate Backend
 
-Frontend --> User: Display dynamic\nvariable input form
+Frontend --> User: Render dynamic variable form\n(VariableInput / FileDropZone)
 deactivate Frontend
 
-== Search Users ==
+== Step 2: Resolve OpenStack-backed variables ==
 
-User -> Frontend: Search for users\nto add to team
+User -> Frontend: Open a resource picker\n(@openstack-marked variable)
 activate Frontend
 
-Frontend -> Backend: GET /users/search\n?query={search_term}&limit=10
+Frontend -> Backend: GET /me/openstack/resources/{type}
+note right
+  networks, subnets, flavors, images,
+  keypairs, security-groups,
+  floating-ip-pools, volumes,
+  routers, availability-zones
+end note
 activate Backend
 
-Backend -> Backend: get_current_user_keycloak()
-
-Backend -> Database: search_users(\nquery, limit)
+Backend -> Database: load + decrypt the user's\nOpenStack credential
 activate Database
-Database --> Backend: matching users
+Database --> Backend: credential
 deactivate Database
 
-Backend --> Frontend: User[]
+Backend -> OpenStack: list resources\n(per-user connection)
+activate OpenStack
+OpenStack --> Backend: resource list
+deactivate OpenStack
+
+Backend --> Frontend: resource list (cached per user)
 deactivate Backend
 
-Frontend --> User: Display search results
+Frontend --> User: OpenStackResourcePicker\nwith real project resources
+deactivate Frontend
+
+opt user clicks "Refresh"
+    User -> Frontend: Refresh resources
+    activate Frontend
+    Frontend -> Backend: POST /me/openstack/resources/refresh
+    activate Backend
+    Backend -> Backend: invalidate the user's\nresource cache
+    Backend --> Frontend: 204 No Content
+    deactivate Backend
+    deactivate Frontend
+end
+
+opt admin-configured default network
+    Frontend -> Backend: GET /admin/settings
+    activate Backend
+    Backend -> Database: get_setting_value("default_network")
+    activate Database
+    Database --> Backend: default network
+    deactivate Database
+    Backend --> Frontend: settings
+    deactivate Backend
+    note right of Frontend
+      Left empty, the backend fills
+      @openstack:network variables
+      with this default on create.
+    end note
+end
+
+== Step 3: Search users and assign groups ==
+
+User -> Frontend: Search for users\nto add to a team
+activate Frontend
+
+Frontend -> Backend: GET /users/search\n?query={term}&limit=10
+activate Backend
+
+Backend -> Backend: require_staff()
+note right
+  TEACHER or ADMIN only.
+end note
+
+alt query shorter than 2 characters
+    Backend --> Frontend: 400 Bad Request
+end
+
+Backend -> Keycloak: search_keycloak_users(query, limit)
+activate Keycloak
+Keycloak --> Backend: Keycloak users
+deactivate Keycloak
+
+loop for each Keycloak user
+    Backend -> Database: sync_user_from_keycloak()
+    activate Database
+    note right
+      Creates/updates the local user
+      row, so team membership can
+      reference it.
+    end note
+    Database --> Backend: local user
+    deactivate Database
+end
+
+Backend --> Frontend: User[]\n{userId, email, username,\nrole, courseId, firstName, lastName}
+deactivate Backend
+
+Frontend --> User: Display search results,\nassign users to teams
+deactivate Frontend
+
+opt assign a whole course
+    User -> Frontend: Pick a course
+    activate Frontend
+    Frontend -> Backend: GET /courses/{course_id}/users
+    activate Backend
+    Backend -> Database: get_course_users()
+    activate Database
+    Database --> Backend: course members
+    deactivate Database
+    Backend --> Frontend: UserResponse[]
+    deactivate Backend
+    Frontend --> User: Prefill teams from the course
+    deactivate Frontend
+end
+
+== Step 4: Summary ==
+
+User -> Frontend: Review the summary
+activate Frontend
+
+Frontend -> Backend: GET /quotas/overview
+activate Backend
+Backend -> OpenStack: read project quota + usage
+activate OpenStack
+OpenStack --> Backend: quota / usage
+deactivate OpenStack
+Backend --> Frontend: QuotaOverviewResponse
+deactivate Backend
+
+Frontend --> User: Show variables, teams and\nremaining quota;\n"Create Deployment" enabled
+note right
+  Confirming continues in the
+  Deployment Creation diagram.
+end note
 deactivate Frontend
 
 @enduml

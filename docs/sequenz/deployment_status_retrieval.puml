@@ -9,7 +9,9 @@ actor "User" as User
 participant "Frontend\n[Container: Vue.js]" as Frontend
 participant "Backend API\n[Container: FastAPI]" as Backend
 database "PostgreSQL\n[Container: Database]" as Database
-queue "RabbitMQ\n[Container: Message Broker]" as RabbitMQ
+participant "Worker\n[Container: Python]" as Worker
+
+== Detail view (snapshot) ==
 
 User -> Frontend: View deployment details
 activate Frontend
@@ -19,31 +21,164 @@ activate Backend
 
 Backend -> Backend: get_current_user_keycloak()
 
-Backend -> Backend: ensure_resource_access(\ndeployment.userId, current_user)
-
-Backend -> Database: get_deployment(\ndeploymentId)\nwith eager loading
+Backend -> Database: get_deployment_with_details(\ndeploymentId)
 activate Database
 note right
+  Eager-loaded relations:
   deployment.user
   deployment.app
-  deployment.tasks
   deployment.teams
 end note
 Database --> Backend: Deployment with relations
 deactivate Database
 
+Backend -> Backend: ensure_deployment_access(\ndeployment, current_user)
+
+Backend -> Database: get_latest_task(deploymentId)
+activate Database
+Database --> Backend: latest task
+deactivate Database
+
+Backend -> Backend: derive_status(\ntask.status, task.type)
 note right
-  status is derived
-  from deployment.tasks:
-  - Latest task status
-  - PENDING/RUNNING/SUCCESS/FAILED
+  The status is synthesized from the
+  latest task's (status, type) pair —
+  task.status alone is not enough:
+  (destroy, pending|running) -> destroying
+  (destroy, success)         -> destroyed
+  (pause,   pending|running) -> pausing
+  (pause,   success)         -> paused
+  (pause,   failed)          -> pause_failed
+  (resume,  pending|running) -> resuming
+  (resume,  failed)          -> resume_failed
+  otherwise the raw task status
+  (pending/running/success/
+   failed/cancelled)
 end note
 
-Backend --> Frontend: DeploymentWithRelations
+Backend -> Backend: can_view_deployment_owner()
+note right
+  Owner view = creator, admin, or
+  course-teacher of the owner's course.
+  Plain members only see their own
+  team(s) and get no logs, no outputs.
+end note
 
+Backend -> Database: get_deployment_teams_with_members(\ndeploymentId)
+activate Database
+Database --> Backend: teams with members
+deactivate Database
+
+alt owner view
+    Backend -> Database: get_deployment_outputs(\ndeploymentId)
+    activate Database
+    Database --> Backend: OpenTofu outputs\n(tasks.outputs)
+    deactivate Database
+end
+
+Backend --> Frontend: DeploymentDetail\n{status, latest_task\n(current_phase, progress_pct),\nteams, outputs, logs?}
 deactivate Backend
 
-Frontend --> User: Display deployment:\n- status (from tasks)\n- logs (from latest task)\n- outputs (from latest task)
+Frontend --> User: Display deployment:\n- derived status\n- phase + progress bar\n- teams, outputs
+deactivate Frontend
+
+== Live progress (Server-Sent Events) ==
+
+User -> Frontend: Deployment is pending/running
+activate Frontend
+
+Frontend -> Backend: GET /deployments/{id}/stream\n(Last-Event-ID on reconnect)
+activate Backend
+
+Backend -> Backend: ensure_view_deployment_owner()
+note right
+  The stream carries raw worker stdout
+  (OpenTofu/Packer output), so it is
+  limited to the inspect set: owner,
+  admin, course-teacher.
+end note
+
+Backend -> Database: get_latest_task(deploymentId)
+activate Database
+Database --> Backend: task (status, current_phase,\nprogress_pct, type)
+deactivate Database
+
+Backend --> Frontend: event: snapshot\n{task_id, status,\ncurrent_phase, progress_pct, type}
+
+alt task already finished and no Last-Event-ID
+    Backend --> Frontend: close stream
+    note right
+      The full log lives on the task row;
+      a finished task needs no stream.
+    end note
+    Frontend --> User: Show the final state\nfrom the detail response
+else task still running (or resuming a stream)
+
+    Backend -> Backend: db_events.subscribe(deploymentId)
+    note right
+      One LISTEN connection per uvicorn
+      process on channel task_events;
+      a notification only wakes the
+      open streams of that deployment.
+    end note
+
+    loop until terminal event or disconnect
+
+        Worker -> Database: INSERT task_events\n(task-progress / task-log)
+        activate Database
+        activate Worker
+        note right
+          The worker batches events and
+          commits them together: one
+          NOTIFY per batch, not per line.
+          Progress events also update
+          tasks.current_phase /
+          progress_pct.
+        end note
+        Database -->> Backend: NOTIFY task_events\n(payload: deployment id)
+        deactivate Worker
+        deactivate Database
+
+        Backend -> Database: SELECT task_events\nWHERE taskId = ? AND id > last\nORDER BY id LIMIT 500
+        activate Database
+        Database --> Backend: new event rows
+        deactivate Database
+
+        Backend --> Frontend: id: {event id}\nevent: progress | log\ndata: {...}
+
+        Frontend --> User: Update phase, progress bar\nand log console
+
+        alt no events for 15 s
+            Backend --> Frontend: ": keepalive"
+            note right
+              Keeps proxies and the client
+              from closing an idle connection.
+            end note
+        end
+
+    end
+
+    Worker -> Database: UPDATE tasks\n(status: SUCCESS|FAILED,\nlogs, outputs)\n+ INSERT terminal task_event
+    activate Database
+    activate Worker
+    deactivate Worker
+    Database -->> Backend: NOTIFY task_events
+    deactivate Database
+
+    Backend -> Database: SELECT task_events (new)
+    activate Database
+    Database --> Backend: terminal event
+    deactivate Database
+
+    Backend --> Frontend: event: succeeded | failed | revoked\ndata: {task_id, task_type,\nstatus, failure_kind?}
+
+    Frontend -> Backend: GET /deployments/{id}\n(refetch final state)
+
+    Frontend --> User: Final status, outputs,\naccess data
+
+end
+
+deactivate Backend
 deactivate Frontend
 
 @enduml

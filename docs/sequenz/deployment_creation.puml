@@ -9,85 +9,194 @@ actor "User" as User
 participant "Frontend\n[Container: Vue.js]" as Frontend
 participant "Backend API\n[Container: FastAPI]" as Backend
 database "PostgreSQL\n[Container: Database]" as Database
-queue "RabbitMQ\n[Container: Message Broker]" as RabbitMQ
+participant "Worker\n[Container: Python]" as Worker
 
-User -> Frontend: Fill form and\nclick "Create Deployment"
+User -> Frontend: Fill wizard and\nclick "Create Deployment"
 activate Frontend
 
-Frontend -> Backend: POST /api/deployments\n{name, appId, releaseTag,\nuserInputVar, teams[]}
+Frontend -> Backend: POST /deployments\n{name, appId, releaseTag,\nuserInputVar, files[], teams[]}
 activate Backend
 
 Backend -> Backend: get_current_user_keycloak()
 
-Backend -> Database: create_deployment(\nname, appId, userId,\nreleaseTag, userInputVar)
+Backend -> Database: acquire_user_xact_lock(userId)
 activate Database
-
-Database --> Backend: deployment object
+note right
+  Per-user advisory lock: serializes
+  against PUT /me/openstack-credentials
+  and concurrent POST /deployments.
+  Held until the next COMMIT/ROLLBACK.
+end note
+Database --> Backend: lock held
 deactivate Database
 
-alt teams provided
-
-Backend -> Database: create_teams_for_deployment(\ndeploymentId, teams[])
+Backend -> Database: get_app(appId)
 activate Database
-loop for each team
-    Database -> Database: create Team(\nname, deploymentId)
-    loop for each userId in team
-        Database -> Database: create UserToTeam(\nuserId, teamId)
+Database --> Backend: app object
+deactivate Database
+
+alt app missing or soft-deleted
+    Backend --> Frontend: 404 Not Found\n{reason: "app_not_found_or_deleted"}
+    Frontend --> User: Error: App not available
+end
+
+Backend -> Backend: ensure_view_app()
+note right
+  Same visibility gate as list/detail:
+  owner or admin, otherwise the app
+  must be public AND have an
+  approved version -> 403
+end note
+
+Backend -> Backend: load_variable_definitions(\napp, releaseTag)
+note right
+  Clones the release vars and parses
+  terraform/variables.tf plus every
+  discovered Packer template, so the
+  author's declarations (varScope,
+  fileExtensions, @openstack markers)
+  can be enforced server-side.
+end note
+
+Backend -> Backend: _attach_files_to_user_input()
+note right
+  Folds the wizard's parallel file
+  uploads into userInputVar.terraform
+  and validates base64, size caps and
+  the declared fileExtensions.
+end note
+
+Backend -> Database: get_setting_value("default_network")
+activate Database
+Database --> Backend: default network
+deactivate Database
+
+Backend -> Backend: _apply_default_network()
+
+Backend -> Backend: _validate_scoped_user_input()
+note right
+  varScope = team|user: every value
+  must be a map whose keys match the
+  deployment's team / user roster.
+end note
+
+group single transaction
+
+    Backend -> Database: create_deployment(\nname, appId, userId,\nreleaseTag, userInputVar)
+    activate Database
+    Database --> Backend: deployment object
+    deactivate Database
+
+    alt teams provided
+
+        Backend -> Database: create_teams_for_deployment(\ndeploymentId, teams[])
+        activate Database
+        loop for each team
+            Database -> Database: create Team(\nname, deploymentId)
+            loop for each userId in team
+                Database -> Database: create UserToTeam(\nuserId, teamId)
+            end
+        end
+        Database --> Backend: team objects
+        deactivate Database
+
+        Backend -> Database: create_user_to_deployments(\ndeploymentId, user_ids)
+        activate Database
+        loop for each userId
+            Database -> Database: create UserToDeployment(\nuserId, deploymentId)
+        end
+        Database --> Backend: user associations
+        deactivate Database
+
     end
+
+    Backend -> Backend: parse userInputVar JSON
+
+    Backend -> Backend: format teams_dict\n{team_name: [{email}]}
+
+    Backend -> Database: _fetch_dispatch_envelope(userId)
+    activate Database
+    note right
+      Per-user OpenStack credential,
+      encrypted field by field. Read
+      inside the locked TX, so the
+      envelope matches the committed
+      credential row.
+    end note
+    Database --> Backend: openstack_envelope
+    deactivate Database
+
+    alt no credentials uploaded
+        Backend --> Frontend: 400 Bad Request\n"OpenStack credentials required"
+        Frontend --> User: Error: Upload credentials first
+    end
+
+    Backend -> Backend: task_service.prepare_task_in_tx()
+    note right
+      Builds the JobPayload (app, release,
+      user_vars, teams, openstack_envelope)
+      and a fresh random state_token.
+      The payload is Fernet-encrypted into
+      tasks.payload; only the token's
+      SHA-256 hash stays on the row.
+    end note
+
+    Backend -> Database: INSERT Task(\ndeploymentId, type: DEPLOY,\nstatus: PENDING,\npayload: sealed,\nstate_token_hash, locale)
+    activate Database
+
+    alt active task already exists
+        note right of Database
+          Partial unique index
+          uq_tasks_active_per_deployment
+          rejects a second PENDING/RUNNING
+          task for the same deployment.
+        end note
+        Database --> Backend: IntegrityError
+        Backend -> Database: ROLLBACK
+        deactivate Database
+        Backend --> Frontend: 409 Conflict\n"Active task already running"
+        Frontend --> User: Error: Cannot create deployment,\nactive task in progress
+    else accepted
+        Database --> Backend: task object
+        deactivate Database
+    end
+
 end
-Database --> Backend: team objects
-deactivate Database
 
-Backend -> Database: create_user_to_deployments(\ndeploymentId, user_ids)
+Backend -> Database: COMMIT
 activate Database
-
-loop for each userId
-    Database -> Database: create UserToDeployment(\nuserId, deploymentId)
-end
-Database --> Backend: user associations
+note right
+  The commit IS the hand-over:
+  deployment + teams + mappings +
+  task become visible together, and
+  an ON COMMIT trigger issues
+  NOTIFY task_queued.
+end note
+Database -->> Worker: NOTIFY task_queued
 deactivate Database
+note right of Worker
+  A listening worker slot wakes and
+  claims the row with
+  SELECT ... FOR UPDATE SKIP LOCKED
+  (see Background Task Execution).
+end note
 
-end
-
-Backend -> Backend: parse userInputVar JSON
-
-Backend -> Backend: format_teams_dict()
-
-Backend -> Backend: task_service.register_new_task()
-
-Backend -> Database: get_tasks(deploymentId)
+Backend -> Database: get_deployment_status(deploymentId)
 activate Database
-Database --> Backend: existing tasks
-deactivate Database
-
-alt no active tasks (PENDING/RUNNING)
-
-Backend -> RabbitMQ: celery_app.send_task(\n"tasks.deploy_application",\nargs=[...])
-activate RabbitMQ
-RabbitMQ --> Backend: AsyncResult with celery_task_id
-deactivate RabbitMQ
-
-Backend -> Database: create_task(\ndeploymentId, celeryTaskId,\ntype: DEPLOY,\nstatus: PENDING)
-activate Database
-
-Database --> Backend: task object
+Database --> Backend: derived status ("pending")
 deactivate Database
 
 Backend --> Frontend: 201 Created\nDeploymentResponse
 deactivate Backend
 
-Frontend --> User: Deployment created
+Frontend -> Backend: GET /deployments/{id}/stream
+note right
+  The wizard switches straight into
+  the live view; see Deployment
+  Status Retrieval.
+end note
+
+Frontend --> User: Deployment created,\nlive progress shown
 deactivate Frontend
-
-else active task exists
-
-Backend --> Frontend: 400 Bad Request\n"Active task already running"
-deactivate Backend
-activate Frontend
-
-Frontend --> User: Error: Cannot create deployment,\nactive task in progress
-deactivate Frontend
-
-end
 
 @enduml

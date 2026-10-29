@@ -5,65 +5,206 @@
 
 title Error Handling - Sequence Diagram
 
+participant "Frontend\n[Container: Vue.js]" as Frontend
 participant "Backend API\n[Container: FastAPI]" as Backend
 database "PostgreSQL\n[Container: Database]" as Database
-queue "RabbitMQ\n[Container: Message Broker]" as RabbitMQ
-participant "Celery Worker\n[Container: Python]" as Worker
+participant "Worker\n[Container: Python]" as Worker
+participant "OpenStack\n[External System]" as OpenStack
 
-alt Task fails at any step
+note across
+  Nothing is retried automatically. A half-applied OpenTofu run is not
+  something to repeat blindly, so every failure ends in a FAILED task
+  that a person looks at.
+end note
 
-    activate Worker
-    Worker -> Worker: catch Exception
+== Case 1: the job itself fails ==
+
+activate Worker
+Worker -> Worker: catch Exception
+note right
+  Raised by any step of the
+  Background Task Execution:
+  git clone, Packer build,
+  tofu init / plan / apply.
+end note
+
+Worker -> Worker: collect_terraform_outputs()
+note right
+  Best effort: a half-finished apply
+  still created resources, and their
+  outputs describe what exists.
+end note
+
+alt terraform dir exists
+    Worker -> OpenStack: tofu destroy\n(variables without file payloads)
+    activate OpenStack
     note right
-        Will be thrown if one of the steps in the Background Task Execution fails
+      Best-effort cleanup of a partially
+      applied graph, so orphaned networks,
+      ports and volumes do not quietly eat
+      the project's quota. Failures here
+      are logged and ignored — the task
+      fails either way.
     end note
-
-    Worker -> Worker: collect_terraform_state()\nif terraform_dir exists
-
-
-    Worker -> Worker: collect_terraform_outputs()\nif terraform_dir exists
-
-    Worker -> Worker: git_service.cleanup_repository()
-
-    
-
-    Worker -> RabbitMQ: emit task-failed event\n{type: 'task-failed',\nuuid: celery_task_id,\nexception: Failure(...)}
-    deactivate Worker
-    activate RabbitMQ
-    note right
-      Failure exception contains
-      JSON-encoded data:
-      {
-        error: str,
-        deployment_id: str,
-        logs: list[dict],
-        tf_state: str | None,
-        terraform_outputs: dict | None
-      }
-    end note
-
-    RabbitMQ --> Backend: event received
-    deactivate RabbitMQ
-    activate Backend
-
-    Backend -> Database: get_tasks(\ncelery_task_id)
-    activate Database
-    Database --> Backend: task object
-    deactivate Database
-
-    Backend -> Backend: parse exception JSON\nvia regex extraction
-    note right
-      Extracts structured data
-      from Failure exception message
-    end note
-
-    Backend -> Database: update_task(\ntaskId,\n{status: FAILED,\nfinished_at: utcnow(),\nlogs: formatted logs + error,\ntf_state: partial state,\noutputs: partial outputs})
-    activate Database
-    Database --> Backend: updated task
-    deactivate Database
-
-    deactivate Backend
-
+    OpenStack --> Worker: resources removed\n(or cleanup failed)
+    deactivate OpenStack
 end
+
+Worker -> Worker: shred per-task clouds.yaml\n+ cleanup_repository()
+
+Worker -> Worker: raise Failure(\nmessage, deployment_id,\nlogs_dict, commit_info,\nterraform_outputs)
+
+Worker -> Worker: job_queue.failure_columns(error)
+note right
+  The Failure carries what the job
+  produced before it broke. No event
+  bus and no regex over a traceback:
+  the columns are built directly from
+  the exception. A non-Failure
+  exception is a worker bug — its
+  traceback goes into the log.
+end note
+
+group single transaction
+    Worker -> Database: SELECT status, claimed_by\nFOR UPDATE
+    activate Database
+    Database --> Worker: row
+
+    alt still RUNNING and still ours
+        Worker -> Database: UPDATE tasks\n{status: FAILED,\nfinished_at: utcnow(),\nlease_until: NULL,\nlogs: logs + error + commit,\noutputs: partial outputs}
+        Worker -> Database: INSERT task_events\n{type: task-failed,\ntask_id, task_type,\nfailure_kind: worker_failure}
+    else the reaper already failed it
+        Worker -> Database: UPDATE tasks\n(result columns only,\nstatus left untouched)
+        note right
+          The lease was taken over; the
+          results are still worth keeping,
+          the status is not ours to set.
+        end note
+    end
+    deactivate Worker
+    Database --> Database: COMMIT
+end
+
+Database -->> Backend: NOTIFY task_events\n+ NOTIFY task_finished
+activate Backend
+
+Backend --> Frontend: event: failed\n{failure_kind: worker_failure}
+Frontend --> Frontend: show error, stop the\nprogress bar, offer retry
+
+Backend -> Backend: task_finalizer.finalize_task()
+deactivate Database
+
+Backend -> Database: SELECT task\nWHERE finalized_at IS NULL\nFOR UPDATE SKIP LOCKED
+activate Database
+note right
+  Every uvicorn process hears
+  task_finished; SKIP LOCKED makes
+  sure only one of them does the
+  follow-up work.
+end note
+Database --> Backend: claimed task
+
+Backend -> Database: UPDATE tasks\n{finalized_at: utcnow()}\n+ delete events of earlier tasks
+note right
+  A failed task sends no access mails
+  and is not soft-deleted — the
+  deployment stays visible with its
+  log so the user can read what broke.
+end note
+Database --> Backend: committed
+deactivate Database
+deactivate Backend
+
+== Case 2: the worker disappears (lease expires) ==
+
+activate Worker
+Worker -> Database: lease renewal every\nWORKER_LEASE_SECONDS / 3
+activate Database
+Database --> Worker: renewed
+deactivate Database
+note right of Worker
+  The worker was killed, crashed or
+  lost its database connection, so the
+  renewals stop.
+end note
+destroy Worker
+
+Backend -> Backend: run_reaper()\nevery TASK_REAPER_INTERVAL_SECONDS
+activate Backend
+
+Backend -> Database: SELECT tasks\nWHERE status = RUNNING\nAND lease_until < now()\nFOR UPDATE SKIP LOCKED\nLIMIT 20
+activate Database
+Database --> Backend: expired tasks
+
+loop for each expired task
+    Backend -> Database: UPDATE tasks\n{status: FAILED,\nfinished_at: utcnow(),\nlease_until: NULL,\nlogs: logs + worker-lost message\n(in the task's locale)}
+    Backend -> Database: INSERT task_events\n{type: task-failed,\nfailure_kind: worker_lost}
+end
+Database --> Database: COMMIT
+Database -->> Backend: NOTIFY task_events\n+ NOTIFY task_finished
+deactivate Database
+
+Backend --> Frontend: event: failed\n{failure_kind: worker_lost}
+Frontend --> Frontend: close the live stream,\nshow "worker lost"
+
+Backend -> Backend: finalize_pending()\n(safety net each tick)
+deactivate Backend
+
+== Case 3: the state cannot be saved ==
+
+activate Worker
+Worker -> Backend: POST /internal/tfstate/{deployment_id}\n(OpenTofu http backend)
+activate Backend
+Backend --> Worker: connection error / 5xx
+deactivate Backend
+note right of Worker
+  The API was unreachable at the end
+  of an apply, past OpenTofu's own
+  retries, so OpenTofu writes
+  errored.tfstate. The resources it
+  lists exist in OpenStack, so the
+  file must not be lost with the
+  job directory.
+end note
+
+Worker -> Worker: _preserve(errored.tfstate)
+note right
+  Fernet-encrypted copy into
+  WORKER_STATE_RESCUE_DIR (a volume),
+  written before any retry so it
+  survives the worker dying.
+end note
+
+loop until WORKER_STATE_RESCUE_SECONDS, backoff 5s..60s
+    Worker -> Backend: tofu state push errored.tfstate
+    activate Backend
+    note right
+      Same task, same token — the backend
+      lets a task override its own
+      leftover lock, so the worker is not
+      locked out by the lock it could
+      never release.
+    end note
+    Backend -> Database: tf_state_store.write()\n(encrypted)
+    activate Database
+    Database --> Backend: stored
+    deactivate Database
+    Backend --> Worker: 200 OK
+    deactivate Backend
+end
+
+alt push succeeded
+    Worker -> Worker: delete the rescue copy\n+ log "state saved after all"
+else still unreachable
+    Worker -> Worker: log the copy's path and the\nrestore_tfstate.py command
+    note right
+      An admin restores it with
+      scripts/restore_tfstate.py; the
+      backend refuses a state of another
+      lineage or an older serial unless
+      --force is given.
+    end note
+end
+deactivate Worker
 
 @enduml
