@@ -1,5 +1,7 @@
 # Build-Prozess & CI/CD Pipeline Appstore
 
+*Zuletzt aktualisiert: 29.10.2026*
+
 Diese Pipeline beschreibt den Entwicklungsprozess, das Bauen und das Deployment der Hauptplattform selbst (Frontend, Backend, Worker).
 
 ---
