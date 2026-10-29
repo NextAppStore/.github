@@ -16,11 +16,11 @@
 
 ---
 
-## 3. Worker: Asynchrone Verarbeitung — Celery, RabbitMQ & Redis
+## 3. Worker: Asynchrone Verarbeitung via PostgreSQL
 
-**Beschreibung:** Um langlaufende Prozesse zu handhaben, wird eine Task-Queue-Architektur eingesetzt. Celery übernimmt die Verwaltung der Hintergrundaufgaben und setzt dabei auf zwei spezialisierte Infrastruktur-Komponenten: **RabbitMQ** als Message Broker (Aufgaben werden vom Backend an den Worker zugestellt) und **Redis** als Result Backend (Task-Ergebnisse + Live-Status werden für Abfragen aus dem Frontend zwischengespeichert). Zusätzlich dient Redis als Pub/Sub-Layer für die Server-Sent-Events, über die das Frontend Deployment-Logs in Echtzeit empfängt.
+**Beschreibung:** Um langlaufende Prozesse zu handhaben, wird eine Task-Queue-Architektur eingesetzt. Diese wird vollständig in PostgreSQL über eine Tabelle und die Befehle LISTEN und NOTIFY realisiert.
 
-**Begründung:** Durch Celery wird die Ausführung entkoppelt: Die API nimmt den Auftrag im Millisekunden-Bereich entgegen, während der Worker ihn im Hintergrund abarbeitet. Dies hält die UI reaktionsfähig. RabbitMQ und Redis übernehmen dabei bewusst unterschiedliche Rollen, weil ihre Stärken komplementär sind: RabbitMQ ist auf zuverlässige Task-Zustellung ausgelegt (persistente Queues, Acknowledgements, Retry-Mechanismen) und stellt sicher, dass Deployment-Tasks auch bei Worker-Ausfällen nicht verloren gehen — diese Garantien wären bei einem reinen Redis-Broker schwächer. Redis hingegen ist als schneller In-Memory-Speicher genau richtig für flüchtige Daten: Task-Ergebnisse, die das Frontend kurz nach Abschluss abfragt, sowie das Pub/Sub-Forwarding der Live-Log-Events an die SSE-Streams. Die Kombination ist gegenüber einer reinen RabbitMQ- oder reinen Redis-Lösung robuster und gleichzeitig performanter.
+**Begründung:** Durch eine Queue-Architektur bleibt die UI flüssig und das Backend wird entlastet. Die Aufgaben werden durch den Worker abgearbeitet, welcher mehrere Threads zur Verfügung stellt, um die Aufgaben zu parallelisieren. Besonders Infrastruktur-Änderungen via OpenTofu werden so abgearbeitet.
 
 ---
 
@@ -33,25 +33,22 @@ Der Stack besteht aus folgenden Containern:
 | Container | Aufgaben |
 |---|---|
 | **PostgreSQL** | Zentrale Datenhaltung der Anwendung (Benutzer, Apps, Deployments) |
-| **PostgreSQL (tfstate)** | Separater Postgres-Container ausschließlich für Terraform Remote State. Läuft isoliert im Worker-Netzwerk und ist für das Backend nicht erreichbar |
-| **RabbitMQ** | Entkoppelt zeitintensive Deployment-Prozesse vom Backend; erhöht Skalierbarkeit und Ausfallsicherheit |
-| **Redis** | Celery Result Backend; speichert Task-Ergebnisse im Arbeitsspeicher |
 | **Keycloak** | Identity Provider; Verwaltung von Benutzern, Rollen und Rechten; OIDC-basierte Authentifizierung für Frontend und Backend |
 | **Backend** | REST-API; nimmt Anfragen entgegen, validiert Tokens gegen Keycloak, persistiert Daten und dispatcht Deployment-Tasks an RabbitMQ |
 | **Worker** | Konsumiert Tasks aus RabbitMQ; klont App-Repositories; führt Packer und Terraform aus; provisioniert Infrastruktur auf OpenStack |
 | **Frontend** | Vue 3 SPA, ausgeliefert von nginx im Container; kommuniziert ausschließlich über die Backend API |
 | **nginx** | Reverse Proxy und TLS-Terminierung. Leitet eingehende HTTPS-Requests (Port 443) an Frontend, Backend (`/api/`) und Keycloak (`/realms/`) weiter. Das Self-Signed-Zertifikat wird von Ansible beim ersten Deploy erzeugt und bei Folgedeploys wiederverwendet |
 
-**Deploymentprozess:** Ein Push auf `main` in einem der Service-Repositories (Backend, Frontend, Worker) löst zunächst die jeweilige CI-Pipeline aus, die das Image baut und in die GHCR pusht. Sobald das erfolgreich abgeschlossen ist, triggert die Pipeline automatisch den Deployment-Workflow im deployment-Repository. Terraform provisioniert die OpenStack-VM (oder stellt sicher, dass sie läuft) und gibt die IP-Adresse aus. Anschließend führt Ansible das Deployment-Playbook auf der VM aus: es synchronisiert das Repository, schreibt die `.env`-Datei aus dem GitHub-Secret, rendert `keycloak/realm-export.json.j2` mit der öffentlichen URL der VM, zieht die GHCR-Images und startet den Stack via `docker compose up`. Datenbankmigrationen werden als expliziter Ansible-Task ausgeführt, damit Fehler sichtbar im Pipeline-Log erscheinen und nicht im Compose-Output verschwinden.
+**Deploymentprozess:** Ein Push auf `main` in einem der Service-Repositories (Backend, Frontend, Worker) löst zunächst die jeweilige CI-Pipeline aus, die das Image baut und in die GHCR pusht. Sobald das erfolgreich abgeschlossen ist, triggert die Pipeline automatisch den Deployment-Workflow im deployment-Repository. OpenTofu provisioniert die OpenStack-VM (oder stellt sicher, dass sie läuft) und gibt die IP-Adresse aus. Anschließend führt Ansible das Deployment-Playbook auf der VM aus: es synchronisiert das Repository, schreibt die `.env`-Datei aus dem GitHub-Secret, rendert `keycloak/realm-export.json.j2` mit der öffentlichen URL der VM, zieht die GHCR-Images und startet den Stack via `docker compose up`. Datenbankmigrationen werden als expliziter Ansible-Task ausgeführt, damit Fehler sichtbar im Pipeline-Log erscheinen und nicht im Compose-Output verschwinden.
 
 Der Keycloak-Realm wird beim ersten Hochfahren automatisch aus `realm-export.json` importiert, das Ansible zuvor mit der korrekten APP_BASE_URL befüllt hat. Dadurch entfällt manuelles Klicken im Admin-UI bei jedem frischen Deploy.
 
-**Begründung:** Docker garantiert Portabilität: Entwicklung und Deployment laufen in identischen Umgebungen, was die Gefahr umgebungsbedingter Fehler deutlich reduziert. Multi-Stage Builds halten die Images klein und frei von Build-Werkzeugen. Gegen Kubernetes wurde bewusst entschieden, da der Konfigurationsaufwand für diesen Projektrahmen unverhältnismäßig wäre. Docker Compose ist hier die schlanke, wartbare Lösung. Kubernetes bleibt eine Option, falls zukünftig Skalierung über mehrere Server hinweg notwendig wird.
+**Begründung:** Docker garantiert Portabilität: Entwicklung und Deployment laufen in identischen Umgebungen, was die Gefahr umgebungsbedingter Fehler deutlich reduziert. Multi-Stage Builds halten die Images klein und frei von Build-Werkzeugen.
 
 ---
 
-## 5. Infrastructure as Code (IaC): Terraform & Packer
+## 5. Infrastructure as Code (IaC): OpenTofu & Packer
 
-**Beschreibung:** Die Infrastruktur wird nicht manuell, sondern durch Code definiert. Terraform provisioniert die Ressourcen (VMs, Netzwerke, Security Groups) auf OpenStack. Packer wird genutzt, um Abbilder für die VMs zu bauen.
+**Beschreibung:** Die Infrastruktur wird nicht manuell, sondern durch Code definiert. OpenTofu provisioniert die Ressourcen (VMs, Netzwerke, Security Groups) auf OpenStack. Packer wird genutzt, um Abbilder für die VMs zu bauen.
 
 **Begründung:** Dieser Ansatz ermöglicht Disaster Recovery "per Knopfdruck" und vollständige Versionierung der Infrastruktur in Git. Ein entscheidender Vorteil ist der "Golden Image"-Workflow mit Packer. Anstatt eine leere VM zu starten und dann minutenlang Software zu installieren (wie bei reinem Ansible/Shell-Scripting oft üblich), erstellt Packer ein fertiges Image (Snapshot).
