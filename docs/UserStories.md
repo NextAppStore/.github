@@ -15,9 +15,8 @@
 | [BWL-1](#bwl-1) | BWL Dozent | Informationen vor der Installation |
 | [BWL-2](#bwl-2) | BWL Dozent | Mit wenigen Klicks starten |
 | [BWL-3](#bwl-3) | BWL Dozent | Empfehlungen und Hilfe bei der Konfiguration |
-| [BWL-4](#bwl-4) | BWL Dozent | VMs nicht vernetzen |
-| [BWL-5](#bwl-5) | BWL Dozent | Übungsdatensätze zentral ablegen |
-| [BWL-6](#bwl-6) | BWL Dozent | Bedienung ohne technische Vorkenntnisse |
+| [BWL-4](#bwl-4) | BWL Dozent | Übungsdatensätze zentral ablegen |
+| [BWL-5](#bwl-5) | BWL Dozent | Bedienung ohne technische Vorkenntnisse |
 | [ADMIN-1](#admin-1) | Administrator | Integration in den Self-Service |
 
 ---
@@ -210,15 +209,16 @@ Anmerkung: „einfach“ ist nicht messbar — die Story ist eher eine Qualität
 | | |
 |---|---|
 | **Als** | IT Dozent |
-| **möchte ich** | dass die einzelnen VMs untereinander vernetzt sind, |
+| **möchte ich** | dass die einzelnen VMs bei Bedarf untereinander vernetzt sind, |
 | **damit** | ich Netzwerk- und Client-Server-Szenarien im Kurs durchspielen kann. |
 
 **Akzeptanzkriterien**
 
 | # | Kriterium |
 |:-:|---|
-| 1 | Die VMs eines Deployments liegen in einem gemeinsamen Netzwerk und erreichen sich gegenseitig über ihre privaten IP-Adressen. |
+| 1 | Die VMs eines Deployments liegen bei Bedarf in einem gemeinsamen Netzwerk und erreichen sich gegenseitig über ihre privaten IP-Adressen. |
 | 2 | Die IP-Adressen aller VMs eines Deployments sind für die Lehrperson in der Infrastruktur-Ansicht sichtbar. |
+| 3 | Sollte das Feature nicht aktiviert sein, sollen die VMs sich nicht gegenseitig erreichen. |
 
 **INVEST**
 
@@ -288,25 +288,7 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 <a id="bwl-4"></a>
 
-### BWL-4 - VMs nicht vernetzen
-
-| | |
-|---|---|
-| **Als** | BWL Dozent |
-| **möchte ich** | die Möglichkeit haben, die VMs untereinander nicht zu vernetzen, |
-| **da** | die Arbeit in der Regel individuell erfolgt und somit klar getrennt ist. |
-
-**Akzeptanzkriterien**
-
-| # | Kriterium |
-|:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
-
-<a id="bwl-5"></a>
-
-### BWL-5 - Übungsdatensätze zentral ablegen
+### BWL-4 - Übungsdatensätze zentral ablegen
 
 | | |
 |---|---|
@@ -322,9 +304,9 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 | 2 | Jede Gruppe hat eine eigene Kopie der Dateien, um nicht die der anderen Gruppe verändern zu können. |
 | 3 | |
 
-<a id="bwl-6"></a>
+<a id="bwl-5"></a>
 
-### BWL-6 - Bedienung ohne technische Vorkenntnisse
+### BWL-5 - Bedienung ohne technische Vorkenntnisse
 
 | | |
 |---|---|
