@@ -248,9 +248,15 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Der Dozent kann vor dem Starten eines Deployments eine Detailseite der App aus dem Katalog aufrufen. |
+| 2 | Die Detailseite zeigt eine verständliche Beschreibung, die den fachlichen Zweck der Lernumgebung und die vorgesehenen Einsatzszenarien für Studierende erläutert. |
+| 3 | Der Dozent kann die gewünschte Version der App über ein einfaches Auswahlmenü festlegen. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
 <a id="bwl-2"></a>
 
@@ -266,9 +272,19 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Auf jeder App-Kachel im Katalog steht eine Schaltfläche für den Schnell-Deploy zur Verfügung. |
+| 2 | Ein Klick auf Schnell-Deploy öffnet einen kompakten Auswahldialog für den Zielkurs oder Dozenten. |
+| 3 | Alle Konfigurationsvariablen werden automatisch mit den Standardwerten der App belegt und der mehrstufige Wizard wird direkt zur Zusammenfassungsseite übersprungen. |
+| 4 | Verlangt eine App zwingende Pflichtangaben ohne Standardwert, wird der Dozent mit einem Hinweis in den regulären Konfigurations-Wizard geleitet. |
+| 5 | Vom Klick auf die App-Kachel bis zum Starten des Deployments sind maximal 2 bis 3 Klicks erforderlich. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
+
+Anmerkung: „mit wenigen Klicks“ ist für sich nicht messbar — Kriterium 5 macht es prüfbar.
 
 <a id="bwl-3"></a>
 
@@ -284,9 +300,16 @@ Anmerkung: IT-6 und BWL-4 beschreiben dieselbe Einstellung von zwei Seiten (vern
 
 | # | Kriterium |
 |:-:|---|
-| 1 | |
-| 2 | |
-| 3 | |
+| 1 | Variablen, für die der App-Entwickler Standardwerte definiert hat, sind im Konfigurations-Wizard vorausgefüllt. |
+| 2 | In Auswahllisten ist die empfohlene Standardoption mit einem gut sichtbaren Badge markiert. |
+| 3 | Tooltips bzw. Hilfefelder erklären den Zweck technischer Einstellungen in verständlicher Sprache. |
+| 4 | Alle optionalen Einstellungen mit funktionierenden Standardwerten sind standardmäßig eingeklappt, sodass die Ansicht für Dozenten übersichtlich bleibt. |
+
+**INVEST**
+
+| I | N | V | E | S | T |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| ja | ja | ja | ja | ja | ja |
 
 <a id="bwl-4"></a>
 
