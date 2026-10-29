@@ -224,60 +224,15 @@ Alle Checks aus Phase 2 werden **nochmal ausgeführt**:
 
 ---
 
-## Phase 5: Production Deployment (DHBW OpenStack)
+## Phase 5: Staging Deployment (DHBW OpenStack)
 
-### Problem: VPN-Beschränkung
-**DHBW OpenStack ist nur via VPN erreichbar**
-- GitHub Actions kann nicht direkt deployen
-- Keine eingehenden Webhooks möglich
-- Keine SSH-Verbindung von außen
+*Da das OpenStack der DHBW nur via VPN erreichbar ist, laufen diese Workflows auf einem Self-Hosted GitHub-Runner in einer VM auf OpenStack.*
 
-### Deployment-Methode: Docker Compose mit Watchtower
-
-**docker-compose.prod.yml:**
-```yaml
-services:
-  backend:
-    image: ghcr.io/six7-click-n-deploy/backend:latest
-    # ... weitere Konfiguration
-  
-  frontend:
-    image: ghcr.io/six7-click-n-deploy/frontend:latest
-    # ... weitere Konfiguration
-  
-  worker:
-    image: ghcr.io/six7-click-n-deploy/worker:latest
-    # ... weitere Konfiguration
-```
-
-**Automatisiertes Pull-basiertes Deployment**
-
-### Watchtower Konfiguration
-
-```yaml
-services:
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - WATCHTOWER_POLL_INTERVAL=300  # 5 Minuten
-      - WATCHTOWER_CLEANUP=true       # Alte Images löschen
-      - WATCHTOWER_INCLUDE_STOPPED=false
-      - WATCHTOWER_ROLLING_RESTART=true
-    command: backend frontend worker
-    restart: unless-stopped
-```
-
-**Funktionsweise:**
-1. Watchtower prüft alle 5 Minuten die Registry
-2. Vergleicht Image Digest/Hash mit lokalem Container
-3. Bei neuem Image:
-   - Pull neues Image
-   - Stop Container
-   - Start Container mit neuem Image
-   - Health Check
-4. Bei Fehler: Automatischer Rollback
-
----
+Die Workflows der einzelnen Repositories triggern den staging-Workflow im deployment-Repository. Dieser prüft die Infrastruktur der VM und führt folgende Schritte via Ansible aus, falls sie benötigt werden:
+1. Installiert Docker
+2. Entfernt ungenutzte Images
+3. Lädt neue Images
+4. Lädt docker-compose.staging.yml herunter
+5. Startet docker-compose
+6. Lädt Testdaten
+7. Führt Health-Checks durch
