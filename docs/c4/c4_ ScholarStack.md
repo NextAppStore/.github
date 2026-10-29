@@ -1,35 +1,34 @@
 # Level 1 - System Context
-<img width="8880" height="8221" alt="finalLevel1-SystemContext" src="https://github.com/user-attachments/assets/1ad7d76e-103d-43a6-a397-ea0d0ce66cdb" />
-<img width="2500" height="500" alt="finalLevel1-SystemContext-key" src="https://github.com/user-attachments/assets/8fa011e7-1c1e-475d-9ef1-dbd5ac4d1ac0" />
+<img width="8880" height="8221" alt="c4_Level1-SystemContext" src="https://github.com/user-attachments/assets/5dd51608-0d07-4f62-b249-06b93860297a" />
+<img width="2500" height="500" alt="c4_Level1-SystemContext-key" src="https://github.com/user-attachments/assets/8b19ab5d-5fa8-4dca-a700-e95379b398e8" />
 
 <br></br>
 
-<!-- Level 2 onwards still need to be updated to newest version. Will be done after a closer review. -->
 # Level 2 - Container
-<img width="16085" height="10148" alt="new_versionLevel2-Container" src="https://github.com/user-attachments/assets/991711a0-e79d-49a6-9e44-dc4981921848" />
-<img width="2500" height="1000" alt="new_versionLevel2-Container-key" src="https://github.com/user-attachments/assets/34dc6d8b-4159-4968-aa2e-f25fd0ad6f66" />
+<img width="16085" height="10148" alt="c4_Level2-Container" src="https://github.com/user-attachments/assets/b7d190c3-3e68-4276-9a06-e040ba62cfee" />
+<img width="2500" height="1000" alt="c4_Level2-Container-key" src="https://github.com/user-attachments/assets/ef33a374-f45e-4b43-960f-eb81ce3e7dee" />
 
 <br></br>
 
 # Level 3 - Komponenten
 ## Komponenten: Backend API Anfragen
-<img width="100%" alt="Level3-Komponenten-Backend-API-Anfragen" src="https://github.com/user-attachments/assets/ac4dbde6-490d-4603-b9f5-834af046dc2f" />
-<img width="100%" alt="keyLevel3-Komponenten-Backend-API-Anfragen-key" src="https://github.com/user-attachments/assets/27c44a62-7b2b-492e-85bd-4ef608de45dc" />
+<img width="1669" height="1079" alt="c4_Level3-Komponenten-Backend-API-Anfragen" src="https://github.com/user-attachments/assets/8582b1c8-5435-4d8c-8045-9372b94f059d" />
+<img width="2500" height="1000" alt="c4_Level3-Komponenten-Backend-API-Anfragen-key" src="https://github.com/user-attachments/assets/e8e45e36-32be-4fff-b832-24ef581abdd5" />
 
 <br></br>
 
 ## Komponenten: Backend API Deployment
-<img width="100%" alt="Level3-Komponenten-Backend-API-Deployments" src="https://github.com/user-attachments/assets/ca9929d5-b974-47ba-a1a7-757ead5da2c0" />
-<img width="100%" alt="Level3-Komponenten-Backend-API-Deployments-key" src="https://github.com/user-attachments/assets/e9f3b930-ef67-4c95-8fdc-dfcc590e7aac" />
+<img width="16760" height="15113" alt="c4_Level3-Komponenten-Backend-API-Deployments" src="https://github.com/user-attachments/assets/c02e2840-a718-45f1-a789-1b36aec1caec" />
+<img width="2500" height="1000" alt="c4_Level3-Komponenten-Backend-API-Deployments-key" src="https://github.com/user-attachments/assets/50c20d49-a307-4bf8-8682-6b4aa8b530af" />
 
 <br></br>
 
 ## Komponenten: Worker
-<img width="100%" alt="Level3-Komponenten-Worker" src="https://github.com/user-attachments/assets/9c091343-2e70-4b78-949e-59af3c1c0a3d" />
-<img width="100%" alt="Level3-Komponenten-Worker-key" src="https://github.com/user-attachments/assets/854ee651-101d-4356-b9a1-361950195895" />
+<img width="20045" height="10133" alt="c4_Level3-Komponenten-Worker" src="https://github.com/user-attachments/assets/f7f5e9bc-462b-4f19-87ed-77a01ea050f1" />
+<img width="2500" height="1000" alt="c4_Level3-Komponenten-Worker-key" src="https://github.com/user-attachments/assets/40155e2c-4245-4739-90b7-f0ab42d3e843" />
 
 <br></br>
 
 # Level 4 - Code
-<img width="100%" alt="Level4-Code-Persistence-Layer" src="https://github.com/user-attachments/assets/3b65ec50-f5ca-45c9-83aa-baf9ebae7a57" />
-<img width="100%" alt="Level4-Code-Persistence-Layer-key" src="https://github.com/user-attachments/assets/89c74a88-e4fc-4959-b0c6-19c952c140b6" />
+<img width="17220" height="10365" alt="c4_Level4-Code-Persistence-Layer" src="https://github.com/user-attachments/assets/7c7f4f7c-e86f-468d-9af3-4b952f738118" />
+<img width="2500" height="500" alt="c4_Level4-Code-Persistence-Layer-key" src="https://github.com/user-attachments/assets/0175f237-bc62-40c1-bf47-82fbdb20d2e8" />
