@@ -43,31 +43,9 @@ flowchart TB
     ut -->|Befunde| issues["GitHub-Issues (frontend-review)"]
 ```
 
-### Beleg: Durchgeführte Usability-Runde (27.10.2026)
+### Dokumentation der Tests
 
-Protokolle versioniert unter [`docs/frontend-test-reviews`](./frontend-test-reviews). Rollen & Szenarien:
-
-| Protokoll | Tester | Fokus |
-|---|---|---|
-| A — Voller Weg | Jannis Voß | Kompletter Deployment-Pfad: Kurs → Variablen → fertige VM |
-| B — Studentensicht | Fabian | Rechte & Datenschutz: keine fremden Daten, unzulässige Routen |
-| C — Schnell-Deploy | Adrian | Quick-Deploy nutzen und mit kleinen Anpassungen durchgehen |
-| D — Sprachwechsel | Till | DE/EN umschalten, gezielt Übersetzungsfehler suchen |
-| F — Admin | Michelle | Versionen freigeben, Standard-Netzwerk setzen, VM-Metadaten prüfen |
-
-Befunde wurden als Issues (Label `frontend-review`, R1–R7) erfasst — Beobachtung → Issue:
-
-| Beobachtung | Tester | Issue (Typ) |
-|---|---|---|
-| Unbekannte URL zeigt eine leere Seite (404-Route fehlt) | Fabian | R1 (Bug) |
-| VM-Topologie/-Metadaten ausgeblendet statt „nicht angegeben" | Michelle | R2 (Bug) |
-| Deutsche Labels im englischen Dashboard; Datumsformat nicht lokalisiert; Status-Rohwerte wie `success`/`pause_failed` | Till | R3 (Bug) |
-| Wizard-Korrektur in Schritt 1 erzwingt kompletten Neudurchlauf | — | R4 (Enhancement) |
-| „Zurück zur Übersicht" führt erneut auf „Jetzt deployen" | Adrian | R5 (Bug) |
-| Freigegebener Versionsstatus erst nach manuellem Neuladen sichtbar | Michelle | R6 (Bug) |
-| UI-Politur (doppelter Button, Tab-Name „AppStore", SSH-Layout-Shift) | Jannis | R7 (Enhancement) |
-
-Zusätzlicher Prozess-Befund: In den Deployment-Logs erscheint noch `terraform init`, obwohl auf **OpenTofu** umgestellt wurde (Protokoll C).
+Die ausgefüllten Protokolle liegen versioniert unter [`docs/frontend-test-reviews`](./frontend-test-reviews). Gefundene Auffälligkeiten werden als **GitHub-Issues** (Label `frontend-review`) erfasst und so einem Fix zugeordnet. Konkrete Ergebnisse stehen bewusst nicht hier, sondern in den Protokollen und Issues.
 
 ---
 
@@ -88,11 +66,13 @@ flowchart TB
 
 1. **CI/CD + Code-Reviews:** keine Codeänderung ohne Tests. Jedes Code-Repo besitzt eine Pipeline (`.github/workflows/ci.yml`), die bei jedem PR und Push läuft; ein PR ist erst mergefähig, wenn Tests/Lint/Typprüfung grün sind **und** ein Review-Approval vorliegt.
 
-   | Repo | Pipeline-Schritte (qualitativ) |
-   |---|---|
-   | `frontend` | Typprüfung (vue-tsc), Tests mit Coverage (Vitest), Coverage-Report auf GitHub Pages |
-   | `backend` | Linting (Ruff), Unit- + Integrationstests (pytest), Coverage |
-   | `worker` | Linting + Format (Ruff), Typprüfung (MyPy), Unit- + Integrationstests (pytest), Coverage |
+   Die CI-Gates gliedern sich in drei Aspekte (verifiziert in den Workflows der Code-Repos, Security teils auch im `deployment`-Repo):
+
+   | Aspekt | Inhalt | Werkzeuge (Repo) |
+   |---|---|---|
+   | **Automatisierte Tests** | Unit- + Integrationstests, Coverage-Reporting | pytest (backend, worker), Vitest (frontend) |
+   | **Statische Analyse** | Linting, Type-Checking, Formatierung | Ruff + MyPy (backend, worker), vue-tsc (frontend) |
+   | **Security** | Dependency-Audit, Container-Scan, Secret-Scan, IaC-Scan | npm-/pip-audit, Trivy fs/image/config, Gitleaks |
 
 2. **Testumgebung:** kontrolliertes Starten und Nutzen mehrerer VMs, ggf. mit anderen Gruppen abgestimmt.
 3. **Dokumentation:** konkrete Angaben über **Ressourcenverbrauch** und Probleme bei vorhandenen VMs → siehe **§2.1 (VM-Belastbarkeitstest)**.
@@ -149,16 +129,10 @@ Zuverlässigkeit hängt am automatisierten Deployment-Ablauf:
 
 ScholarStack sichert die Qualität über drei Bereiche mit jeweils messbarem Ziel:
 
-- **Usability:** PR-UI-Reviews gegen ein Messziel + monatliche, rollenbasierte Usability-Tests mit Issue-Nachverfolgung (R1–R7).
+- **Usability:** PR-UI-Reviews gegen ein Messziel + monatliche, rollenbasierte Usability-Tests; Befunde werden als GitHub-Issues (`frontend-review`) nachverfolgt.
 - **Reliability & Performance:** CI/CD + verpflichtende Code-Reviews (kein Code ohne Tests), kontrollierte Testumgebung, dokumentierter VM-Ressourcenverbrauch (§2.1), geplante Produktivumgebung mit Load Balancer.
 - **Dokumentation:** zielgruppengerechte Doku, Agent-Harness, User-Story-Pflege, App-Template-Skill.
 
 Belege: Workflow-Dateien (`.github/workflows/`), PR-/Actions-Tabs der Repos, Usability-Protokolle unter `docs/frontend-test-reviews` sowie der VM-Belastbarkeitstest (§2.1).
 
----
 
-## 5. Offene Punkte
-
-- _Beteiligtenliste im Kopf im Team final bestätigen._
-- _Messkriterium „keine Downtimes während Vorlesungen": Nachweis-/Monitoring-Weg festlegen (womit wird gemessen?)._
-- _VM-Belastbarkeitstest (§2.1) um Lasttests bis zur Grenze erweitern (RAM bis OOM, CPU-Sättigung mit `vmstat`/`sar`), sobald gewünscht._
